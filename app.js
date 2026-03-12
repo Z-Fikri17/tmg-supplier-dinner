@@ -29,6 +29,10 @@ let selectedTable  = null;
 let bFilterVal     = 'all';
 let ciLog          = [];
 let slipFile       = null;
+let logoFile       = null;
+let slideFile      = null;
+let videoFile      = null;
+let SEAT_PLAN      = [];
 let scale          = 1;
 
 const ADMINS = [
@@ -177,7 +181,33 @@ function confirmTable() {
   document.getElementById('slip-fn').textContent   = '';
   document.getElementById('slip-fn').className     = 'text-xs text-muted';
   document.getElementById('slip-zone').classList.remove('has-file');
+  resetAssetUploads();
+  toggleSponsorAssets();
   goTo('pg-form');
+}
+
+function toggleSponsorAssets() {
+  const sec = document.getElementById('sponsor-assets');
+  if (!sec) return;
+  if (currentPkg === 'gold') sec.classList.remove('hidden');
+  else sec.classList.add('hidden');
+}
+
+function resetAssetUploads() {
+  logoFile = null; slideFile = null; videoFile = null;
+  const items = [
+    { zone: 'logo-zone',  name: 'logo-fn',  input: 'logo-inp'  },
+    { zone: 'slide-zone', name: 'slide-fn', input: 'slide-inp' },
+    { zone: 'video-zone', name: 'video-fn', input: 'video-inp' },
+  ];
+  items.forEach(i => {
+    const zone = document.getElementById(i.zone);
+    const name = document.getElementById(i.name);
+    const inp  = document.getElementById(i.input);
+    if (zone) zone.classList.remove('has-file');
+    if (name) { name.textContent = ''; name.className = 'text-xs text-muted'; }
+    if (inp) inp.value = '';
+  });
 }
 
 /* ── Guest rows ─────────────────────────────────────── */
@@ -203,6 +233,20 @@ function handleSlipChange(input) {
   document.getElementById('slip-fn').textContent = '✓ ' + file.name;
   document.getElementById('slip-fn').className   = 'text-xs text-emerald-400';
   document.getElementById('slip-zone').classList.add('has-file');
+}
+
+function handleAssetChange(input, kind) {
+  const file = input.files[0];
+  if (!file) return;
+  if (kind === 'logo')  logoFile  = file;
+  if (kind === 'slide') slideFile = file;
+  if (kind === 'video') videoFile = file;
+  const map = { logo: 'logo', slide: 'slide', video: 'video' };
+  const key = map[kind];
+  const fn  = document.getElementById(key + '-fn');
+  const zone= document.getElementById(key + '-zone');
+  if (fn) { fn.textContent = '✓ ' + file.name; fn.className = 'text-xs text-emerald-400'; }
+  if (zone) zone.classList.add('has-file');
 }
 
 /* ── Submit registration ─────────────────────────────── */
@@ -232,29 +276,73 @@ async function submitReg() {
   fd.append('table_no',        selectedTable.n);
   fd.append('guests',          JSON.stringify(guests));
   fd.append('slip',            slipFile);
+  if (logoFile)  fd.append('logo',     logoFile);
+  if (slideFile) fd.append('ad_slide', slideFile);
+  if (videoFile) fd.append('ad_video', videoFile);
 
   toast('Submitting registration…');
 
-  const result = await fetch(API + '/suppliers', { method: 'POST', body: fd })
-    .then(r => r.json()).catch(() => null);
+  let result = null;
+  let apiOk = false;
+  try {
+    const res = await fetch(API + '/suppliers', { method: 'POST', body: fd });
+    result = await res.json().catch(() => null);
+    if (!res.ok) {
+      toast(result?.error || 'Registration failed', 'err');
+      return;
+    }
+    apiOk = true;
+  } catch (e) {
+    apiOk = false;
+  }
 
   let tid, displayCo;
-  if (result?.ticket_id) {
+  if (apiOk && result?.ticket_id) {
     tid = result.ticket_id;
     displayCo = co;
     await loadBookings();
     TAKEN_TABLES.add(selectedTable.n);
+  } else if (apiOk) {
+    toast('Unexpected server response', 'err');
+    return;
   } else {
-    // Offline fallback for demo
+    // Offline fallback for demo (no API)
     tid = 'TMG-2026-' + String(Date.now()).slice(-3);
     displayCo = co;
+    const now = new Date().toISOString();
+    const local = {
+      id: Date.now(),
+      ticket_id: tid, tid,
+      company_name: co, co,
+      contact_name: cp, cp,
+      designation: document.getElementById('f-des').value || '', des: document.getElementById('f-des').value || '',
+      email: em, em,
+      phone: ph, ph,
+      package: currentPkg, pkg: currentPkg,
+      total_seats: p.seats, pax: p.seats,
+      table_no: selectedTable.n, tbl: selectedTable.n,
+      payment_status: 'review', pay: 'review',
+      payment_slip_url: '',
+      checked_in: 0, ci: 0,
+      registered_at: now.slice(0, 10), reg: now.slice(0, 10),
+      guests,
+    };
+    BOOKINGS.push(local);
+    TAKEN_TABLES.add(selectedTable.n);
   }
 
   document.getElementById('c-tid').textContent  = tid;
   document.getElementById('c-co').textContent   = displayCo;
   document.getElementById('c-pkg').textContent  = p.label + ' · RM ' + fmt(p.price);
   document.getElementById('c-tbl').textContent  = 'Table ' + selectedTable.n + ' · ' + PKG[currentPkg].zone + ' Zone · ' + p.seats + ' seats';
-  genQR(tid + '|' + displayCo + '|T' + selectedTable.n, 'c-qr');
+  const qrPayload = tid + '|' + displayCo + '|T' + selectedTable.n;
+  genQR(qrPayload, 'c-qr');
+  const ce = document.getElementById('c-email-to');
+  const cPkgEl = document.getElementById('c-email-pkg');
+  const cSeatsEl = document.getElementById('c-email-seats');
+  if (ce) ce.textContent = em;
+  if (cPkgEl) cPkgEl.textContent = p.label + ' (RM ' + fmt(p.price) + ')';
+  if (cSeatsEl) cSeatsEl.textContent = p.seats + ' pax';
   updateLandStats();
   goTo('pg-confirm');
   toast('✓ Registration submitted! Ticket: ' + tid);
@@ -265,6 +353,27 @@ function genQR(data, elId) {
   const el = document.getElementById(elId);
   el.innerHTML = '';
   new QRCode(el, { text: String(data), width: 160, height: 160, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.H });
+}
+
+function getQRDataURL(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return null;
+  const img = el.querySelector('img');
+  if (img && img.src) return img.src;
+  const canvas = el.querySelector('canvas');
+  if (canvas) return canvas.toDataURL('image/png');
+  return null;
+}
+
+function downloadQR() {
+  const tidEl = document.getElementById('c-tid');
+  const tid = tidEl ? tidEl.textContent.trim() : 'TMG-2026-QR';
+  const dataUrl = getQRDataURL('c-qr');
+  if (!dataUrl) { toast('QR not ready', 'warn'); return; }
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = 'TMG_QR_' + tid + '.png';
+  a.click();
 }
 
 /* ── Update landing stats ────────────────────────────── */
@@ -498,16 +607,27 @@ function renderPayments() {
 async function approvePay(tid) {
   const b = BOOKINGS.find(x => (x.tid ?? x.ticket_id) === tid);
   if (!b) return;
-  await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' }) });
+  const res = await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' }) });
+  if (!res) { toast('Payment approval failed. Server unavailable.', 'warn'); return; }
   b.pay = b.payment_status = 'paid';
-  toast('✓ Payment approved – ' + (b.co ?? b.company_name));
+  const em = res.email;
+  if (em?.status === 'sent') {
+    toast('OK Payment approved + email sent - ' + (b.co ?? b.company_name));
+  } else if (em?.status === 'failed') {
+    toast('Payment approved. Email failed to send.', 'warn');
+  } else if (em?.status === 'skipped' && em?.reason) {
+    toast('Payment approved. Email skipped: ' + em.reason, 'warn');
+  } else {
+    toast('OK Payment approved - ' + (b.co ?? b.company_name));
+  }
   renderPayments(); renderBookings(); initAdminDash();
 }
 
 async function rejectPay(tid) {
   const b = BOOKINGS.find(x => (x.tid ?? x.ticket_id) === tid);
   if (!b) return;
-  await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected', verified_by: currentAdmin?.n ?? 'admin' }) });
+  const res = await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected', verified_by: currentAdmin?.n ?? 'admin' }) });
+  if (!res) { toast('Payment rejection failed. Server unavailable.', 'warn'); return; }
   b.pay = b.payment_status = 'rejected';
   toast('Payment rejected', 'warn');
   renderPayments(); renderBookings(); initAdminDash();
@@ -538,12 +658,87 @@ function renderAdminSeating() {
            <div class="text-[9px] text-muted mt-0.5">${z === 'gold' ? 10 : z === 'silver' ? 6 : 2} seats</div>`}`;
     g.appendChild(card);
   }
+  renderSeatList();
+}
+
+async function getSeatPlan() {
+  const plan = await apiFetch('/seating/plan');
+  if (Array.isArray(plan)) { SEAT_PLAN = plan; return plan; }
+  const fallback = buildSeatPlanFallback();
+  SEAT_PLAN = fallback;
+  return fallback;
+}
+
+function buildSeatPlanFallback() {
+  const rows = [];
+  for (let t = 1; t <= 54; t++) {
+    const b = BOOKINGS.find(x => (x.tbl ?? x.table_no) === t);
+    const pax = b ? (b.pax ?? b.total_seats) : 0;
+    rows.push({
+      table_no: t,
+      company_name: b ? (b.co ?? b.company_name) : '',
+      guest_count: pax,
+      guests: [],
+    });
+  }
+  return rows;
+}
+
+function formatGuestList(row) {
+  const names = Array.isArray(row?.guests) ? row.guests : [];
+  const count = Number(row?.guest_count ?? names.length ?? 0);
+  if (names.length) return `${count} pax: ${names.join('; ')}`;
+  if (count) return `${count} pax`;
+  return '-';
+}
+
+async function renderSeatList() {
+  const el = document.getElementById('admin-seat-list');
+  if (!el) return;
+  const plan = await getSeatPlan();
+  if (!plan.length) {
+    el.innerHTML = '<div class="px-5 py-6 text-center text-xs text-muted">No seating data</div>';
+    return;
+  }
+  const rows = plan.map(p => {
+    const company = p.company_name || '-';
+    const guests  = formatGuestList(p);
+    return `<tr class="tr border-t border-rim">
+      <td class="px-5 py-3.5 text-xs text-gray-300">Table ${p.table_no}</td>
+      <td class="px-5 py-3.5 text-xs text-gray-300">${company}</td>
+      <td class="px-5 py-3.5 text-xs text-gray-300">${guests}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `
+    <table class="w-full text-left text-xs">
+      <thead class="text-xs text-muted uppercase">
+        <tr class="border-b border-rim">
+          <th class="px-5 py-3.5">Table</th>
+          <th class="px-5 py-3.5">Company</th>
+          <th class="px-5 py-3.5">Guests</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
 /* ═══════════════════════════════════════════════════════
    CHECK-IN
    ═══════════════════════════════════════════════════════ */
-function doCI()       { const c = document.getElementById('ci-inp').value.trim().toUpperCase(); processCI(c); document.getElementById('ci-inp').value = ''; }
+function normalizeTicket(code) {
+  if (!code) return '';
+  const raw = String(code).trim();
+  if (!raw) return '';
+  const tid = raw.split('|')[0];
+  return tid.trim().toUpperCase();
+}
+function doCI() {
+  const raw = document.getElementById('ci-inp').value;
+  const c = normalizeTicket(raw);
+  if (!c) return;
+  processCI(c);
+  document.getElementById('ci-inp').value = '';
+}
 function dCI(c)       { document.getElementById('ci-inp').value = c; doCI(); }
 
 async function processCI(code) {
@@ -655,8 +850,15 @@ function openModal(tid) {
   const ci  = b.ci  ?? b.checked_in;
   const reg = (b.reg ?? b.registered_at ?? '').slice(0, 10);
   const slip = b.payment_slip_url;
+  const logo = b.logo_url;
+  const slide = b.ad_slide_url;
+  const video = b.ad_video_url;
   const btid = b.tid ?? b.ticket_id;
   const guests = b.guests ? (typeof b.guests === 'string' ? JSON.parse(b.guests) : b.guests) : [];
+  const assetBase = API.replace('/api','');
+  const logoLink  = logo ? `<a href="${assetBase}${logo}" target="_blank" class="text-sm text-blue-400 underline">View logo</a>` : '<span class="text-xs text-muted">-</span>';
+  const slideLink = slide ? `<a href="${assetBase}${slide}" target="_blank" class="text-sm text-blue-400 underline">View slide</a>` : '<span class="text-xs text-muted">-</span>';
+  const videoLink = video ? `<a href="${assetBase}${video}" target="_blank" class="text-sm text-blue-400 underline">View video</a>` : '<span class="text-xs text-muted">-</span>';
 
   document.getElementById('modal-bk-body').innerHTML = `
     <div class="flex items-start gap-4">
@@ -675,6 +877,12 @@ function openModal(tid) {
       ${[['Contact', cp], ['Designation', des], ['Email', em], ['Phone', ph], ['Package', p.label], ['Table', 'Table ' + tbl + ' (' + p.zone + ')'], ['Seats', pax + ' pax'], ['Amount', 'RM ' + fmt(p.price)]].map(([k, v]) => `<div class="bg-panel rounded-xl p-3 border border-rim"><div class="text-muted mb-0.5">${k}</div><div class="font-medium text-gray-200">${v}</div></div>`).join('')}
     </div>
     ${slip ? `<div><div class="text-xs text-muted uppercase tracking-widest mb-2 font-medium">Payment Slip</div><a href="${API.replace('/api','')}${slip}" target="_blank" class="text-sm text-blue-400 underline">View uploaded slip →</a></div>` : ''}
+    ${(logo || slide || video) ? `<div><div class="text-xs text-muted uppercase tracking-widest mb-2 font-medium">Sponsor Recognition Assets</div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-panel rounded-xl p-3 border border-rim"><div class="text-muted mb-0.5">Logo</div><div class="font-medium text-gray-200">${logoLink}</div></div>
+        <div class="bg-panel rounded-xl p-3 border border-rim"><div class="text-muted mb-0.5">Ad Slide</div><div class="font-medium text-gray-200">${slideLink}</div></div>
+        <div class="bg-panel rounded-xl p-3 border border-rim sm:col-span-2"><div class="text-muted mb-0.5">Video</div><div class="font-medium text-gray-200">${videoLink}</div></div>
+      </div></div>` : ''}
     ${guests.length ? `<div><div class="text-xs text-muted uppercase tracking-widest mb-2 font-medium">Guest List (${guests.length})</div>
       <div class="grid grid-cols-2 gap-1.5">${guests.map((g, i) => {
         const gn = typeof g === 'string' ? g : (g.guest_name ?? 'Guest');
@@ -704,11 +912,12 @@ function exportPayments() {
   ], 'TMG_Revenue_2026.csv');
   toast('Revenue report exported!');
 }
-function exportSeating() {
+async function exportSeating() {
+  const plan = await getSeatPlan();
   dlCSV([
-    ['Table', 'Zone', 'Company', 'Contact', 'Package', 'Pax'],
-    ...BOOKINGS.map(b => ['T' + (b.tbl ?? b.table_no), PKG[b.pkg ?? b.package]?.zone, b.co ?? b.company_name, b.cp ?? b.contact_name, PKG[b.pkg ?? b.package]?.label, b.pax ?? b.total_seats])
-  ], 'TMG_Seating_2026.csv');
+    ['Table', 'Company', 'Guests'],
+    ...plan.map(p => ['Table ' + p.table_no, p.company_name || '-', formatGuestList(p)])
+  ], 'TMG_Seating_Plan_2026.csv');
   toast('Seating plan exported!');
 }
 function dlCSV(rows, fn) {

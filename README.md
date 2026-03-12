@@ -87,9 +87,11 @@ Bank details:
 | GET    | /api/checkin/log | Recent check-in log |
 | GET    | /api/dashboard | Dashboard summary stats |
 | GET    | /api/seating | Seating plan |
+| GET    | /api/seating/plan | Seating plan with guest list |
 | POST   | /api/seating/assign | Assign table to supplier |
 | GET    | /api/export/suppliers | Download suppliers.csv |
 | GET    | /api/export/guests | Download guests.csv |
+| GET    | /api/export/seating | Download seating plan CSV |
 | GET    | /api/export/checkin | Download checkin_log.csv |
 | GET    | /api/health | Health check + CSV file status |
 
@@ -102,6 +104,33 @@ Bank details:
 | ⭐ Gold  | RM 50,000 | 10   | VIP Front |
 | 🥈 Silver | RM 30,000 | 6   | Front Section |
 | 🥉 Bronze | RM 10,000 | 2   | General Area |
+
+---
+
+## Event Operations (Enhancements)
+
+- QR code digital check-in: ticket QR generated on registration, email template preview, and QR download for check-in.
+- Seating management: table plan (Table | Company | Guests) with CSV export for Excel.
+- Sponsor recognition: upload company logo, advertisement slide, and video (Gold tier).
+- Approval email: when admin marks payment as paid, the system emails the supplier with QR, ticket, and table info (requires SMTP).
+
+---
+
+## SMTP Email (Optional)
+
+Set these environment variables to enable approval emails:
+
+```env
+SMTP_HOST=smtp.yourdomain.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_user
+SMTP_PASS=your_pass
+SMTP_FROM=events@yourdomain.com
+SMTP_FROM_NAME=TMG Supplier Dinner 2026
+```
+
+If SMTP is not configured, approvals still succeed and email sending is skipped.
 
 ---
 

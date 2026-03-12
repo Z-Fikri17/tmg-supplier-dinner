@@ -285,6 +285,36 @@
         <div id="guest-rows" class="space-y-2"></div>
       </section>
 
+      <!-- Sponsor recognition (Gold) -->
+      <section id="sponsor-assets" class="hidden">
+        <div class="text-[10px] font-bold tracking-[.2em] text-yellow-400 uppercase mb-4 flex items-center gap-2 pb-2 border-b border-rim">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m-7.5-9h9a2.25 2.25 0 0 1 2.25 2.25v8.25A2.25 2.25 0 0 1 16.5 19.5h-9A2.25 2.25 0 0 1 5.25 17.25V7.5A2.25 2.25 0 0 1 7.5 5.25Z"/></svg>
+          Sponsor Recognition (Gold)
+        </div>
+        <div class="text-xs text-muted mb-4">For RM 50,000 sponsors, upload your logo, advertisement slide, and video for the dinner screen.</div>
+        <div class="grid sm:grid-cols-3 gap-3">
+          <label id="logo-zone" class="upload-zone">
+            <span class="text-sm text-gray-400 font-medium">Company Logo</span>
+            <span class="text-xs text-muted">PNG/JPG, max 5MB</span>
+            <span id="logo-fn" class="text-xs text-muted"></span>
+            <input id="logo-inp" type="file" class="hidden" accept="image/*" onchange="handleAssetChange(this,'logo')"/>
+          </label>
+          <label id="slide-zone" class="upload-zone">
+            <span class="text-sm text-gray-400 font-medium">Advertisement Slide</span>
+            <span class="text-xs text-muted">PNG/JPG/PDF, max 10MB</span>
+            <span id="slide-fn" class="text-xs text-muted"></span>
+            <input id="slide-inp" type="file" class="hidden" accept="image/*,.pdf" onchange="handleAssetChange(this,'slide')"/>
+          </label>
+          <label id="video-zone" class="upload-zone">
+            <span class="text-sm text-gray-400 font-medium">Dinner Screen Video</span>
+            <span class="text-xs text-muted">MP4/MOV, max 50MB</span>
+            <span id="video-fn" class="text-xs text-muted"></span>
+            <input id="video-inp" type="file" class="hidden" accept="video/*" onchange="handleAssetChange(this,'video')"/>
+          </label>
+        </div>
+        <div class="text-xs text-muted mt-3">Optional for other tiers.</div>
+      </section>
+
       <!-- Payment – Bank Transfer only -->
       <section>
         <div class="text-[10px] font-bold tracking-[.2em] text-yellow-400 uppercase mb-4 flex items-center gap-2 pb-2 border-b border-rim">
@@ -364,10 +394,24 @@
       <div class="flex justify-center mb-3"><div id="c-qr" class="p-3 bg-white rounded-2xl inline-block ap"></div></div>
       <p class="text-xs text-muted mb-8">Present this QR at the entrance on event night</p>
 
+      <div class="text-left p-4 rounded-2xl border border-rim bg-panel mb-6">
+        <div class="text-[10px] text-muted uppercase tracking-widest mb-2 font-medium">Email Sent</div>
+        <div class="text-xs text-muted mb-2">To: <span id="c-email-to">supplier@email.com</span></div>
+        <div class="text-xs text-gray-200">Dear Supplier,</div>
+        <div class="text-xs text-muted mt-1">Thank you for supporting TMG Supplier Appreciation Dinner 2026.</div>
+        <div class="text-xs text-muted mt-2">Package: <span id="c-email-pkg">Gold Sponsor</span></div>
+        <div class="text-xs text-muted">Seats: <span id="c-email-seats">10 pax</span></div>
+        <div class="text-xs text-muted mt-2">Your QR code is attached for event check-in.</div>
+      </div>
+
       <div class="flex gap-3 justify-center">
         <button onclick="window.print()" class="btn-rim flex items-center gap-1.5 text-sm">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-6 0h.008v.008H12V10.5Zm-3 0h.008v.008H9V10.5Z"/></svg>
           Print
+        </button>
+        <button onclick="downloadQR()" class="btn-rim flex items-center gap-1.5 text-sm">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v12m0 0 4-4m-4 4-4-4M4 15v4.5A1.5 1.5 0 0 0 5.5 21h13A1.5 1.5 0 0 0 20 19.5V15"/></svg>
+          Download QR
         </button>
         <button onclick="goTo('pg-land')" class="btn-gold flex items-center gap-1.5 text-sm">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
@@ -552,6 +596,10 @@
         <div class="sec" id="sec-seating">
           <div class="text-center py-3 rounded-2xl border border-yellow-400/20 bg-yellow-400/4 mb-5 fd text-xs tracking-widest text-yellow-400">✦ MAIN STAGE ✦</div>
           <div id="admin-seat-grid" class="grid gap-2.5" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))"></div>
+          <div class="surface rounded-2xl overflow-hidden mt-5">
+            <div class="px-5 py-4 border-b border-rim font-semibold text-sm text-gray-200">Table | Company | Guests</div>
+            <div id="admin-seat-list" class="overflow-x-auto"></div>
+          </div>
         </div>
 
         <!-- ── CHECK-IN ── -->
@@ -571,6 +619,7 @@
                   <input id="ci-inp" class="inp text-xs py-2 flex-1" placeholder="Ticket code e.g. TMG-2026-001" onkeydown="if(event.key==='Enter')doCI()"/>
                   <button onclick="doCI()" class="btn-gold text-xs px-4">✓ Check In</button>
                 </div>
+                <div class="text-xs text-muted mb-3">Use a QR scanner app or iPad registration desk. Scan the QR and paste the ticket code here.</div>
                 <div class="flex flex-wrap gap-1.5">
                   <button onclick="dCI('TMG-2026-001')" class="text-xs border border-yellow-400/25 text-yellow-400/80 px-2.5 py-1 rounded-lg hover:bg-yellow-400/8">Nestle Demo</button>
                   <button onclick="dCI('TMG-2026-003')" class="text-xs border border-yellow-400/25 text-yellow-400/80 px-2.5 py-1 rounded-lg hover:bg-yellow-400/8">Unilever Demo</button>
@@ -615,7 +664,7 @@
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6Z"/></svg>
               </div>
               <div class="font-semibold text-sm">Seating Plan</div>
-              <div class="text-xs text-muted mt-1">Table assignments CSV</div>
+              <div class="text-xs text-muted mt-1">Table | Company | Guests CSV</div>
               <div class="text-xs text-blue-400 mt-2">Download →</div>
             </button>
           </div>

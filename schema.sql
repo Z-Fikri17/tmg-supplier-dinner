@@ -20,6 +20,8 @@ CREATE TABLE suppliers (
     payment_status ENUM('pending','review','paid','rejected') NOT NULL DEFAULT 'pending',
     payment_slip_url VARCHAR(500),
     logo_url      VARCHAR(500),
+    ad_slide_url  VARCHAR(500),
+    ad_video_url  VARCHAR(500),
     checked_in    TINYINT(1)   NOT NULL DEFAULT 0,
     checkin_time  DATETIME,
     registered_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,

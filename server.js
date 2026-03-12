@@ -8,6 +8,8 @@ const cors    = require('cors');
 const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
+const nodemailer = require('nodemailer');
+const QRCode  = require('qrcode');
 
 const app  = express();
 const PORT = process.env.PORT || 4000;
@@ -15,11 +17,12 @@ const PORT = process.env.PORT || 4000;
 /* ── Paths ─────────────────────────────────────────────── */
 const DATA_DIR   = path.join(__dirname, 'data');
 const SLIP_DIR   = path.join(__dirname, 'uploads', 'slips');
+const ASSET_DIR  = path.join(__dirname, 'uploads', 'assets');
 const SUPP_CSV   = path.join(DATA_DIR, 'suppliers.csv');
 const GUESTS_CSV = path.join(DATA_DIR, 'guests.csv');
 const CI_CSV     = path.join(DATA_DIR, 'checkin_log.csv');
 
-[DATA_DIR, SLIP_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); });
+[DATA_DIR, SLIP_DIR, ASSET_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); });
 
 /* ── Middleware ─────────────────────────────────────────── */
 app.use(cors());
@@ -28,10 +31,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /* ── File Upload ────────────────────────────────────────── */
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, SLIP_DIR),
+  destination: (req, file, cb) => cb(null, file.fieldname === 'slip' ? SLIP_DIR : ASSET_DIR),
   filename:    (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, '_')),
 });
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+const uploadReg  = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+const uploadSlip = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 /* ═══════════════════════════════════════════════════════
    CSV HELPERS
@@ -39,13 +43,14 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 const PKG_PRICE = { gold: 50000, silver: 30000, bronze: 10000 };
 const PKG_SEATS = { gold: 10,    silver: 6,      bronze: 2     };
+const PKG_LABEL = { gold: 'Gold Sponsor', silver: 'Silver Sponsor', bronze: 'Bronze Sponsor' };
 
 // Supplier CSV columns
 const SUPP_COLS = [
   'id', 'ticket_id', 'company_name', 'contact_name', 'designation',
   'email', 'phone', 'package', 'total_seats', 'table_no',
   'payment_status', 'payment_slip_url', 'checked_in', 'checkin_time',
-  'registered_at', 'notes',
+  'registered_at', 'notes', 'logo_url', 'ad_slide_url', 'ad_video_url',
 ];
 
 // Guest CSV columns
@@ -166,9 +171,120 @@ function mapSupplier(r) {
     tbl:  Number(r.table_no),
     pax:  Number(r.total_seats),
     pay:  r.payment_status,
+    logo:  r.logo_url,
+    slide: r.ad_slide_url,
+    video: r.ad_video_url,
     ci:   Number(r.checked_in),
     reg:  r.registered_at,
   };
+}
+
+/* ── Email helpers ───────────────────────────────────── */
+function getSmtpConfig() {
+  const host = process.env.SMTP_HOST;
+  if (!host) return null;
+  const port = Number(process.env.SMTP_PORT || 587);
+  const secure = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' || port === 465;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  if (!user || !pass) return null;
+  return { host, port, secure, auth: { user, pass } };
+}
+
+function buildFromAddress() {
+  const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || '';
+  const fromName  = process.env.SMTP_FROM_NAME || 'TMG Supplier Dinner 2026';
+  return fromEmail ? `${fromName} <${fromEmail}>` : '';
+}
+
+async function sendApprovalEmail(supplier) {
+  if (!supplier?.email) return { status: 'skipped', reason: 'Missing supplier email' };
+  const smtp = getSmtpConfig();
+  if (!smtp) return { status: 'skipped', reason: 'SMTP not configured' };
+
+  const transport = nodemailer.createTransport(smtp);
+  const pkgLabel  = PKG_LABEL[supplier.package] || supplier.package || 'Sponsor';
+  const seats     = Number(supplier.total_seats) || PKG_SEATS[supplier.package] || '';
+  const tableNo   = Number(supplier.table_no) || '';
+  const ticketId  = supplier.ticket_id || '';
+  const company   = supplier.company_name || 'Supplier';
+  const tableTag  = tableNo ? `T${tableNo}` : 'TBA';
+
+  const qrPayload = `${ticketId}|${company}|${tableTag}`;
+  const qrBuffer  = await QRCode.toBuffer(qrPayload, { type: 'png', width: 240, errorCorrectionLevel: 'H' });
+
+  const subject = 'TMG Supplier Appreciation Dinner 2026 - Ticket & QR Check-In';
+  const text = [
+    'Dear Supplier,',
+    '',
+    'Thank you for supporting TMG Supplier Appreciation Dinner 2026.',
+    `Company: ${company}`,
+    `Package: ${pkgLabel}`,
+    `Seats: ${seats} pax`,
+    `Table: ${tableNo || 'TBA'}`,
+    `Ticket: ${ticketId}`,
+    '',
+    'Your QR code is attached for event check-in.',
+    'Please present it at the entrance on event night.',
+  ].join('\n');
+
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111;">
+      <p>Dear Supplier,</p>
+      <p>Thank you for supporting <strong>TMG Supplier Appreciation Dinner 2026</strong>.</p>
+      <table style="border-collapse:collapse;margin:12px 0;">
+        <tr><td style="padding:4px 10px 4px 0;">Company:</td><td style="padding:4px 0;"><strong>${company}</strong></td></tr>
+        <tr><td style="padding:4px 10px 4px 0;">Package:</td><td style="padding:4px 0;">${pkgLabel}</td></tr>
+        <tr><td style="padding:4px 10px 4px 0;">Seats:</td><td style="padding:4px 0;">${seats} pax</td></tr>
+        <tr><td style="padding:4px 10px 4px 0;">Table:</td><td style="padding:4px 0;">${tableNo || 'TBA'}</td></tr>
+        <tr><td style="padding:4px 10px 4px 0;">Ticket:</td><td style="padding:4px 0;">${ticketId}</td></tr>
+      </table>
+      <p>Your QR code is attached for event check-in.</p>
+      <div style="margin:14px 0;">
+        <img src="cid:tmgqr" alt="TMG QR Code" width="200" height="200" style="border:1px solid #ddd;padding:6px;border-radius:8px;">
+      </div>
+      <p>Please present this QR at the entrance on event night.</p>
+      <p>- TMG Events Team</p>
+    </div>`;
+
+  const info = await transport.sendMail({
+    from: buildFromAddress(),
+    to: supplier.email,
+    subject,
+    text,
+    html,
+    attachments: [{ filename: `TMG_QR_${ticketId}.png`, content: qrBuffer, cid: 'tmgqr' }],
+  });
+
+  return { status: 'sent', messageId: info.messageId || '' };
+}
+
+/* â”€â”€ Build seating plan (table -> company + guests) â”€â”€ */
+function buildSeatingPlan() {
+  const suppliers = parseCSV(SUPP_CSV, SUPP_COLS).map(mapSupplier);
+  const guestsRaw = parseCSV(GUESTS_CSV, GUEST_COLS);
+  const guestMap  = {};
+  guestsRaw.forEach(g => {
+    const sid = String(g.supplier_id);
+    if (!guestMap[sid]) guestMap[sid] = [];
+    guestMap[sid].push(g.guest_name || 'Guest');
+  });
+
+  const plan = [];
+  for (let t = 1; t <= 54; t++) {
+    const s = suppliers.find(x => Number(x.table_no) === t);
+    const gList = s ? (guestMap[String(s.id)] || []) : [];
+    plan.push({
+      table_no: t,
+      company_name: s ? s.company_name : '',
+      contact_name: s ? s.contact_name : '',
+      package: s ? s.package : '',
+      total_seats: s ? Number(s.total_seats) : 0,
+      guest_count: gList.length,
+      guests: gList,
+    });
+  }
+  return plan;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -202,7 +318,12 @@ app.get('/api/suppliers/:id', (req, res) => {
 });
 
 /* POST /api/suppliers — register new (multipart/form-data with slip) */
-app.post('/api/suppliers', upload.single('slip'), (req, res) => {
+app.post('/api/suppliers', uploadReg.fields([
+  { name: 'slip',     maxCount: 1 },
+  { name: 'logo',     maxCount: 1 },
+  { name: 'ad_slide', maxCount: 1 },
+  { name: 'ad_video', maxCount: 1 },
+]), (req, res) => {
   try {
     const { company_name, contact_name, designation, email, phone, package: pkg, table_no, notes } = req.body;
     if (!company_name || !contact_name || !email || !phone || !pkg) {
@@ -217,7 +338,15 @@ app.post('/api/suppliers', upload.single('slip'), (req, res) => {
 
     const id        = nextId(suppliers);
     const ticket_id = generateTicketId(suppliers);
-    const slip_url  = req.file ? `/uploads/slips/${req.file.filename}` : '';
+    const files     = req.files || {};
+    const slipFile  = files.slip?.[0];
+    const logoFile  = files.logo?.[0];
+    const slideFile = files.ad_slide?.[0];
+    const videoFile = files.ad_video?.[0];
+    const slip_url  = slipFile ? `/uploads/slips/${slipFile.filename}` : '';
+    const logo_url  = logoFile ? `/uploads/assets/${logoFile.filename}` : '';
+    const ad_slide_url = slideFile ? `/uploads/assets/${slideFile.filename}` : '';
+    const ad_video_url = videoFile ? `/uploads/assets/${videoFile.filename}` : '';
 
     const newRec = {
       id, ticket_id, company_name, contact_name,
@@ -227,6 +356,9 @@ app.post('/api/suppliers', upload.single('slip'), (req, res) => {
       table_no:    tbl,
       payment_status:   'review', // slip uploaded → in review
       payment_slip_url: slip_url,
+      logo_url,
+      ad_slide_url,
+      ad_video_url,
       checked_in:  0,
       checkin_time: '',
       registered_at: new Date().toISOString().slice(0, 10),
@@ -252,21 +384,33 @@ app.post('/api/suppliers', upload.single('slip'), (req, res) => {
 });
 
 /* PATCH /api/suppliers/:id/payment — update payment status */
-app.patch('/api/suppliers/:id/payment', (req, res) => {
+app.patch('/api/suppliers/:id/payment', async (req, res) => {
   try {
     const { status, verified_by } = req.body;
     const suppliers = parseCSV(SUPP_CSV, SUPP_COLS);
     const idx = suppliers.findIndex(s => s.ticket_id === req.params.id || String(s.id) === req.params.id);
     if (idx < 0) return res.status(404).json({ error: 'Not found' });
+
+    const prevStatus = suppliers[idx].payment_status;
     suppliers[idx].payment_status = status;
     if (verified_by) suppliers[idx].notes = `Verified by ${verified_by}`;
     writeCSV(SUPP_CSV, suppliers, SUPP_COLS);
-    res.json({ message: 'Payment status updated', status });
+
+    let email = { status: 'skipped', reason: 'Not approved' };
+    if (status === 'paid' && prevStatus !== 'paid') {
+      try {
+        email = await sendApprovalEmail(suppliers[idx]);
+      } catch (e) {
+        email = { status: 'failed', reason: e.message || 'Email send failed' };
+      }
+    }
+
+    res.json({ message: 'Payment status updated', status, email });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 /* POST /api/suppliers/:id/slip — upload slip separately */
-app.post('/api/suppliers/:id/slip', upload.single('slip'), (req, res) => {
+app.post('/api/suppliers/:id/slip', uploadSlip.single('slip'), (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     const url       = `/uploads/slips/${req.file.filename}`;
@@ -369,6 +513,14 @@ app.get('/api/seating', (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+/* GET /api/seating/plan */
+app.get('/api/seating/plan', (req, res) => {
+  try {
+    const plan = buildSeatingPlan();
+    res.json(plan);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 /* POST /api/seating/assign */
 app.post('/api/seating/assign', (req, res) => {
   try {
@@ -401,6 +553,26 @@ app.get('/api/export/guests', (req, res) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="TMG_Guests_2026.csv"');
     res.send(fs.readFileSync(GUESTS_CSV, 'utf8'));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* GET /api/export/seating */
+app.get('/api/export/seating', (req, res) => {
+  try {
+    const plan = buildSeatingPlan();
+    const records = plan.map(p => {
+      const names = Array.isArray(p.guests) ? p.guests : [];
+      const count = Number(p.guest_count || names.length || 0);
+      const guestText = names.length ? `${count} pax: ${names.join('; ')}` : (count ? `${count} pax` : '');
+      return {
+        Table:   'Table ' + p.table_no,
+        Company: p.company_name || '',
+        Guests:  guestText,
+      };
+    });
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="TMG_Seating_Plan_2026.csv"');
+    res.send(stringifyCSV(records, ['Table', 'Company', 'Guests']));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
