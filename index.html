@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TMG Supplier Appreciation Dinner 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      gold:'#C9A84C', 'gold-l':'#E8C96A', 'gold-d':'#9A7A2E',
+      ink:'#09090C', panel:'#111118', card:'#17171F', rim:'#242430', muted:'#5A5A72'
+    },
+    fontFamily: { display:['Cinzel','serif'], body:['DM Sans','sans-serif'] }
+  }}
+}
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:#09090C;color:#EEEEF5;min-height:100vh;overflow-x:hidden}
+
+/* ─── Typography ─────────────────────────── */
+.fd{font-family:'Cinzel',serif}
+
+/* ─── Animations ─────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pop{0%{transform:scale(.8);opacity:0}65%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+@keyframes scan{0%{top:8%}50%{top:84%}100%{top:8%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4)}50%{box-shadow:0 0 0 10px rgba(201,168,76,0)}}
+@keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes gridPulse{0%,100%{opacity:.03}50%{opacity:.06}}
+
+.au{animation:fadeUp .4s ease both}
+.ai{animation:fadeIn .35s ease both}
+.ap{animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+.spin{animation:spin .7s linear infinite}
+.float{animation:float 4s ease-in-out infinite}
+
+/* ─── Gold text gradient ─────────────────── */
+.gt{background:linear-gradient(135deg,#E8C96A 0%,#C9A84C 50%,#9A7A2E 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gt2{background:linear-gradient(90deg,#C9A84C,#E8C96A,#C9A84C);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s linear infinite}
+
+/* ─── Pages ──────────────────────────────── */
+.page{display:none;min-height:100vh}
+.page.active{display:block;animation:fadeUp .35s ease both}
+
+/* ─── Inputs ─────────────────────────────── */
+.inp{background:#111118;border:1.5px solid #242430;border-radius:10px;padding:10px 14px;color:#EEEEF5;font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s;width:100%}
+.inp:focus{border-color:rgba(201,168,76,.55)}
+.inp::placeholder{color:#5A5A72}
+select.inp option{background:#17171F}
+
+/* ─── Buttons ────────────────────────────── */
+.btn-gold{background:linear-gradient(135deg,#C9A84C,#9A7A2E);color:#000;font-weight:700;border-radius:12px;padding:11px 22px;font-size:.875rem;cursor:pointer;transition:all .18s;border:none;font-family:'DM Sans',sans-serif}
+.btn-gold:hover{opacity:.88;transform:translateY(-1px)}
+.btn-gold:active{transform:translateY(0)}
+.btn-rim{background:transparent;border:1.5px solid #242430;color:#94A3B8;font-weight:500;border-radius:10px;padding:9px 18px;font-size:.85rem;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif}
+.btn-rim:hover{border-color:rgba(201,168,76,.4);color:#C9A84C}
+.btn-ok{background:rgba(34,197,94,.12);border:1.5px solid rgba(34,197,94,.25);color:#4ADE80;font-weight:600;border-radius:10px;padding:8px 16px;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-ok:hover{background:rgba(34,197,94,.22)}
+.btn-warn{background:rgba(239,68,68,.12);border:1.5px solid rgba(239,68,68,.25);color:#F87171;font-weight:600;border-radius:10px;padding:8px 16px;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-warn:hover{background:rgba(239,68,68,.22)}
+
+/* ─── Cards / surfaces ───────────────────── */
+.surface{background:#17171F;border:1px solid #242430;border-radius:16px}
+.surface-hover{transition:border-color .2s,transform .2s}
+.surface-hover:hover{border-color:rgba(201,168,76,.3);transform:translateY(-2px)}
+
+/* ─── Badges ─────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
+.b-gold{background:rgba(201,168,76,.12);color:#C9A84C;border:1px solid rgba(201,168,76,.25)}
+.b-silver{background:rgba(148,163,184,.1);color:#94A3B8;border:1px solid rgba(148,163,184,.2)}
+.b-bronze{background:rgba(205,127,50,.12);color:#CD7F32;border:1px solid rgba(205,127,50,.2)}
+.b-paid{background:rgba(34,197,94,.1);color:#4ADE80;border:1px solid rgba(34,197,94,.2)}
+.b-pending{background:rgba(59,130,246,.1);color:#60A5FA;border:1px solid rgba(59,130,246,.2)}
+.b-review{background:rgba(251,191,36,.1);color:#FCD34D;border:1px solid rgba(251,191,36,.2)}
+.b-rejected{background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.2)}
+.b-in{background:rgba(168,85,247,.1);color:#C084FC;border:1px solid rgba(168,85,247,.2)}
+
+/* ─── Seat map ───────────────────────────── */
+.tbl{cursor:pointer;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid transparent;transition:all .18s;text-align:center;font-family:'Cinzel',serif;font-weight:700}
+.tbl-gold{background:#1E1800;border-color:#6A5010;color:#C9A84C}
+.tbl-gold:hover{border-color:#C9A84C;box-shadow:0 0 16px rgba(201,168,76,.35);transform:scale(1.1)}
+.tbl-silver{background:#141820;border-color:#3A4A5A;color:#7A8A9A}
+.tbl-silver:hover{border-color:#7A8A9A;box-shadow:0 0 12px rgba(148,163,184,.2);transform:scale(1.1)}
+.tbl-bronze{background:#1A1008;border-color:#5A3010;color:#CD7F32}
+.tbl-bronze:hover{border-color:#CD7F32;box-shadow:0 0 12px rgba(205,127,50,.25);transform:scale(1.1)}
+.tbl-taken{background:#141414;border-color:#1E1E1E;color:#2E2E2E;cursor:not-allowed;opacity:.45}
+.tbl-selected{border-color:#C9A84C!important;background:rgba(201,168,76,.18)!important;color:#E8C96A!important;box-shadow:0 0 20px rgba(201,168,76,.5),0 0 6px rgba(201,168,76,.8)!important;transform:scale(1.12)!important;animation:pulse-ring 2s infinite}
+
+/* ─── Table rows ─────────────────────────── */
+.tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ─── Nav items (admin sidebar) ─────────── */
+.ni{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:10px;font-size:.84rem;font-weight:500;color:#5A5A72;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ni:hover{color:#C0C0D8;background:rgba(255,255,255,.04)}
+.ni.on{color:#C9A84C;background:rgba(201,168,76,.1)}
+.ni svg{width:16px;height:16px;flex-shrink:0}
+
+/* ─── Sections ───────────────────────────── */
+.sec{display:none}.sec.on{display:block;animation:fadeUp .3s ease both}
+
+/* ─── Scan line ──────────────────────────── */
+.scan-line{position:absolute;left:0;right:0;height:2px;background:#C9A84C;animation:scan 2.2s ease-in-out infinite;box-shadow:0 0 10px #C9A84C}
+
+/* ─── Pill tabs ──────────────────────────── */
+.pt{padding:6px 15px;border-radius:8px;font-size:.79rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;background:transparent;color:#5A5A72;font-family:'DM Sans',sans-serif}
+.pt:hover{color:#C0C0D8}
+.pt.on{background:rgba(201,168,76,.12);color:#C9A84C}
+
+/* ─── Progress bar ───────────────────────── */
+.prog{height:6px;background:#242430;border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#C9A84C,#E8C96A);transition:width .8s cubic-bezier(.34,1,.64,1)}
+
+/* ─── Scrollbar ──────────────────────────── */
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:#111118}::-webkit-scrollbar-thumb{background:#2A2A3A;border-radius:3px}
+
+/* ─── Background grid ────────────────────── */
+.bg-grid{background-image:linear-gradient(rgba(201,168,76,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.04) 1px,transparent 1px);background-size:48px 48px}
+
+/* ─── Modal ──────────────────────────────── */
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+</style>
+</head>
+<body>
+
+<!-- ████████████████████████████████████████
+     LANDING PAGE
+████████████████████████████████████████ -->
+<div class="page active" id="pg-land">
+  <div class="bg-grid min-h-screen flex flex-col" 
+     style="background: 
+            linear-gradient(rgba(9, 9, 12, 0.5), rgba(9, 9, 12, 1.5)), 
+            url('materials/bg.jpg'); 
+            background-color: #09090C; 
+            background-size: cover; 
+            background-position: center;">
+
+    <!-- Radial glow -->
+    <div class="fixed inset-0 pointer-events-none" style="background:radial-gradient(ellipse 80% 55% at 50% -5%,rgba(201,168,76,.11) 0%,transparent 65%)"></div>
+
+    <!-- Top bar -->
+    <header class="relative z-10 flex items-center justify-between px-8 py-5">
+       <div class="fd text-base font-bold tracking-wide"><span class="gt"><img src="materials/logo.png" alt="TMG" class="w-100 h-20"></span><span class="text-gray-400 font-light"></span></div>
+      <!-- Discreet admin entry -->
+    <button onclick="showAdminLogin()" class="p-4 text-xs text-white/20 hover:text-white ...">
+      ···
+    </button>
+    </header>
+
+    <!-- Hero -->
+    <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
+      <div class="au" style="animation-delay:.05s">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-yellow-400/20 bg-yellow-400/5 text-xs text-yellow-400/80 font-medium mb-8 tracking-wider">
+          <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span>
+          REGISTRATION OPEN · 18 OCTOBER 2026
+        </div>
+      </div>
+      <h1 class="fd text-5xl md:text-7xl font-black leading-none mb-4 au" style="animation-delay:.1s">
+        SUPPLIER<br/><span class="gt2">APPRECIATION</span><br/>DINNER
+      </h1>
+      <p class="text-gray-400 text-base mb-3 au" style="animation-delay:.15s">Mandarin Oriental Kuala Lumpur &nbsp;·&nbsp; Grand Ballroom</p>
+      <p class="text-muted text-sm mb-14 au" style="animation-delay:.18s">By Invitation — 1,000 Guests Expected</p>
+
+      <!-- CTA cards -->
+      <div class="grid md:grid-cols-3 gap-5 w-full max-w-4xl au" style="animation-delay:.22s">
+        <!-- Gold -->
+        <div onclick="selectPkg('gold')" class="surface surface-hover cursor-pointer p-7 rounded-2xl relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-b from-yellow-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="text-yellow-400 text-xs font-bold tracking-widest uppercase mb-3">⭐ Gold Sponsor</div>
+          <div class="fd text-4xl font-black gt mb-1">RM 50K</div>
+          <div class="text-muted text-xs mb-5">10 seats · VIP Front Zone</div>
+          <div class="space-y-1.5 mb-6 text-xs text-gray-500">
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-yellow-400"></span>VIP table placement</div>
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-yellow-400"></span>Main backdrop logo</div>
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-yellow-400"></span>30-sec video on screen</div>
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-yellow-400"></span>Emcee mention + gift bags</div>
+          </div>
+          <div class="w-full py-2.5 rounded-xl bg-yellow-400/10 border border-yellow-400/30 text-yellow-400 text-sm font-semibold text-center group-hover:bg-yellow-400/20 transition-colors">
+            Register →
+          </div>
+        </div>
+        <!-- Silver -->
+        <div onclick="selectPkg('silver')" class="surface surface-hover cursor-pointer p-7 rounded-2xl relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-b from-slate-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="text-slate-300 text-xs font-bold tracking-widest uppercase mb-3">🥈 Silver Sponsor</div>
+          <div class="fd text-4xl font-black text-slate-200 mb-1">RM 30K</div>
+          <div class="text-muted text-xs mb-5">6 seats · Front Section</div>
+          <div class="space-y-1.5 mb-6 text-xs text-gray-500">
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Front section tables</div>
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Banner logo placement</div>
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-slate-400"></span>Screen slide rotation</div>
+          </div>
+          <div class="w-full py-2.5 rounded-xl bg-slate-400/10 border border-slate-400/20 text-slate-300 text-sm font-semibold text-center group-hover:bg-slate-400/15 transition-colors">
+            Register →
+          </div>
+        </div>
+        <!-- Bronze -->
+        <div onclick="selectPkg('bronze')" class="surface surface-hover cursor-pointer p-7 rounded-2xl relative overflow-hidden group">
+          <div class="absolute inset-0 bg-gradient-to-b from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div class="text-orange-400 text-xs font-bold tracking-widest uppercase mb-3">🥉 Bronze Sponsor</div>
+          <div class="fd text-4xl font-black text-orange-400 mb-1">RM 10K</div>
+          <div class="text-muted text-xs mb-5">2 seats · General Area</div>
+          <div class="space-y-1.5 mb-6 text-xs text-gray-500">
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-orange-500"></span>General seating area</div>
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-orange-500"></span>Program book logo</div>
+            <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-orange-500"></span>Appreciation certificate</div>
+          </div>
+          <div class="w-full py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 text-sm font-semibold text-center group-hover:bg-orange-500/15 transition-colors">
+            Register →
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="flex flex-wrap justify-center gap-8 mt-14 au" style="animation-delay:.28s">
+        <div class="text-center"><div class="fd text-2xl font-bold gt" id="land-pax">847</div><div class="text-xs text-muted mt-0.5">Seats Booked</div></div>
+        <div class="w-px bg-rim self-stretch"></div>
+        <div class="text-center"><div class="fd text-2xl font-bold text-gray-200">1,000</div><div class="text-xs text-muted mt-0.5">Total Capacity</div></div>
+        <div class="w-px bg-rim self-stretch"></div>
+        <div class="text-center"><div class="fd text-2xl font-bold gt" id="land-sponsors">42</div><div class="text-xs text-muted mt-0.5">Sponsors</div></div>
+        <div class="w-px bg-rim self-stretch"></div>
+        <div class="text-center"><div class="fd text-2xl font-bold text-gray-200">153</div><div class="text-xs text-muted mt-0.5">Seats Left</div></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ████████████████████████████████████████
+     SEAT MAP PAGE
+████████████████████████████████████████ -->
+<div class="page" id="pg-seats">
+  <div class="flex flex-col min-h-screen">
+    <!-- Top bar -->
+    <div class="sticky top-0 z-40 bg-ink/95 backdrop-blur-xl border-b border-rim px-4 py-3 flex items-center gap-3">
+      <button onclick="goTo('pg-land')" class="w-9 h-9 rounded-xl border border-rim flex items-center justify-center text-muted hover:text-gray-200 hover:border-gray-500 transition-colors flex-shrink-0">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+      </button>
+      <div class="flex-1 min-w-0">
+        <div class="fd text-sm font-bold gt truncate" id="seat-pkg-label">Gold Sponsor</div>
+        <div class="text-xs text-muted">Select your table from the venue map</div>
+      </div>
+      <div id="seat-selected-badge" class="hidden badge b-gold text-xs"></div>
+      <button onclick="confirmTable()" id="seat-confirm-btn" class="hidden btn-gold text-xs px-4 py-2">Confirm Table →</button>
+    </div>
+
+    <div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
+      <!-- Map -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Legend -->
+        <div class="flex flex-wrap items-center gap-4 px-5 py-2.5 border-b border-rim text-xs text-muted">
+          <span class="font-medium text-gray-400">Legend:</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full border border-yellow-500/50 bg-yellow-900/30 inline-block"></span>Gold Zone</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full border border-slate-500/40 bg-slate-800/30 inline-block"></span>Silver Zone</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full border border-orange-700/40 bg-orange-900/30 inline-block"></span>Bronze Zone</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full border border-yellow-400 bg-yellow-400/20 inline-block"></span>Selected</span>
+          <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full border border-[#1E1E1E] bg-[#141414] inline-block opacity-40"></span>Taken</span>
+          <span class="ml-auto text-xs text-muted">Scroll to zoom · Drag to pan</span>
+          <button onclick="resetVenue()" class="text-xs border border-rim px-2 py-0.5 rounded text-muted hover:text-gray-200">Reset</button>
+        </div>
+        <!-- Venue -->
+        <div id="venue-wrap" class="flex-1 overflow-auto cursor-grab active:cursor-grabbing" style="min-height:420px">
+          <div id="venue-inner" style="padding:28px;min-width:860px;transform-origin:top center;transition:transform .1s">
+            <!-- Stage -->
+            <div class="text-center py-4 rounded-2xl border border-yellow-400/20 mb-10 mx-auto" style="max-width:560px;background:linear-gradient(180deg,rgba(201,168,76,.1) 0%,rgba(201,168,76,.02) 100%);box-shadow:0 4px 40px rgba(201,168,76,.08)">
+              <div class="fd text-xs font-bold tracking-[.3em] text-yellow-400">✦ &nbsp; MAIN STAGE &nbsp; ✦</div>
+              <div class="text-[10px] text-yellow-400/40 mt-0.5">Podium · Emcee · Projection Screen</div>
+            </div>
+            <!-- Gold zone -->
+            <div class="mb-10">
+              <div class="flex items-center gap-3 mb-5">
+                <div class="h-px flex-1 bg-yellow-400/15"></div>
+                <span class="text-xs font-bold tracking-widest text-yellow-400 uppercase px-2">⭐ Gold VIP Zone</span>
+                <div class="h-px flex-1 bg-yellow-400/15"></div>
+              </div>
+              <div id="zone-gold" class="flex flex-wrap justify-center gap-5"></div>
+            </div>
+            <!-- Silver zone -->
+            <div class="mb-10">
+              <div class="flex items-center gap-3 mb-5">
+                <div class="h-px flex-1 bg-slate-500/20"></div>
+                <span class="text-xs font-bold tracking-widest text-slate-400 uppercase px-2">🥈 Silver Section</span>
+                <div class="h-px flex-1 bg-slate-500/20"></div>
+              </div>
+              <div id="zone-silver" class="flex flex-wrap justify-center gap-4"></div>
+            </div>
+            <!-- Bronze zone -->
+            <div class="mb-6">
+              <div class="flex items-center gap-3 mb-5">
+                <div class="h-px flex-1 bg-orange-700/15"></div>
+                <span class="text-xs font-bold tracking-widest text-orange-400 uppercase px-2">🥉 Bronze General</span>
+                <div class="h-px flex-1 bg-orange-700/15"></div>
+              </div>
+              <div id="zone-bronze" class="flex flex-wrap justify-center gap-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="lg:w-68 border-t lg:border-t-0 lg:border-l border-rim bg-panel flex flex-col flex-shrink-0" style="width:270px">
+        <div class="p-5 border-b border-rim">
+          <div class="fd text-sm font-bold gt mb-0.5" id="side-pkg-name">Gold Sponsor</div>
+          <div class="fd text-2xl font-black text-gray-100" id="side-pkg-price">RM 50,000</div>
+          <div class="text-xs text-muted mt-0.5" id="side-pkg-info">Select 1 table · 10 seats included</div>
+        </div>
+        <div id="side-selected" class="hidden p-5 border-b border-rim">
+          <div class="text-xs text-muted uppercase tracking-widest font-medium mb-3">Your Selection</div>
+          <div class="surface rounded-2xl p-4 border-yellow-400/30 ap" style="border-color:rgba(201,168,76,.3)">
+            <div class="flex items-center gap-2.5 mb-3">
+              <div class="w-9 h-9 rounded-full border border-yellow-400/40 bg-yellow-400/10 flex items-center justify-center fd font-bold text-yellow-400 text-xs flex-shrink-0" id="side-tnum">T1</div>
+              <div><div class="font-semibold text-sm" id="side-tname">Table 1</div><div class="text-xs text-muted" id="side-tzone">Gold VIP Zone</div></div>
+            </div>
+            <div class="text-xs space-y-1">
+              <div class="flex justify-between"><span class="text-muted">Seats</span><span class="text-yellow-400 font-semibold" id="side-tseats">10</span></div>
+              <div class="flex justify-between"><span class="text-muted">Zone</span><span class="font-medium" id="side-tzoneV">VIP</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-5 flex-1 text-xs text-muted space-y-3">
+          <div class="font-medium text-gray-400 uppercase tracking-widest text-[10px] mb-2">How to select</div>
+          <div class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-yellow-400/15 text-yellow-400 font-bold flex items-center justify-center text-[10px] flex-shrink-0">1</span>Browse the venue map</div>
+          <div class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-yellow-400/15 text-yellow-400 font-bold flex items-center justify-center text-[10px] flex-shrink-0">2</span>Click a table in your zone</div>
+          <div class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-yellow-400/15 text-yellow-400 font-bold flex items-center justify-center text-[10px] flex-shrink-0">3</span>Confirm your selection</div>
+          <div class="flex items-start gap-2.5"><span class="w-5 h-5 rounded-full bg-yellow-400/15 text-yellow-400 font-bold flex items-center justify-center text-[10px] flex-shrink-0">4</span>Fill in company details & pay</div>
+          <div class="mt-4 p-3 rounded-xl border border-yellow-400/10 bg-yellow-400/5 text-[11px] text-yellow-400/70">
+            💡 Only tables in your package zone are selectable. Grey = taken by another sponsor.
+          </div>
+        </div>
+        <div class="p-5 border-t border-rim">
+          <button onclick="confirmTable()" id="side-confirm-btn" class="btn-gold w-full py-3 text-sm opacity-40 cursor-not-allowed" disabled>
+            Confirm Table Selection
+          </button>
+          <div class="text-center text-xs text-muted mt-2">No payment until next step</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████████████████████████████████████
+     REGISTRATION FORM PAGE
+████████████████████████████████████████ -->
+<div class="page" id="pg-form">
+  <div class="max-w-2xl mx-auto px-5 py-10">
+    <!-- Booking summary bar -->
+    <div class="surface rounded-2xl p-4 mb-8 flex items-center gap-4 border-yellow-400/25" style="border-color:rgba(201,168,76,.25)">
+      <div class="w-12 h-12 rounded-2xl bg-yellow-400/10 border border-yellow-400/25 fd font-black text-yellow-400 flex items-center justify-center text-sm flex-shrink-0" id="sum-tnum">T1</div>
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold text-sm text-gray-100 truncate" id="sum-desc">Table 1 – Gold VIP Zone</div>
+        <div class="text-xs text-yellow-400 font-semibold" id="sum-pkg">Gold Sponsor · RM 50,000 · 10 seats</div>
+      </div>
+      <button onclick="goTo('pg-seats')" class="text-xs text-muted hover:text-yellow-400 transition-colors underline flex-shrink-0">Change</button>
+    </div>
+
+    <h2 class="fd text-2xl font-bold mb-7">Company <span class="gt">Registration</span></h2>
+
+    <div class="surface rounded-2xl p-7 space-y-7">
+      <!-- Company -->
+      <section>
+        <div class="text-[10px] font-bold tracking-[.2em] text-yellow-400 uppercase mb-4 flex items-center gap-2 pb-2 border-b border-rim">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg>
+          Company Information
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2"><label class="text-xs text-muted block mb-1.5">Company Name *</label><input id="f-co" class="inp" placeholder="e.g. Nestle Malaysia Berhad"/></div>
+          <div><label class="text-xs text-muted block mb-1.5">Contact Person *</label><input id="f-cp" class="inp" placeholder="Full name"/></div>
+          <div><label class="text-xs text-muted block mb-1.5">Designation</label><input id="f-des" class="inp" placeholder="CEO / Director"/></div>
+          <div><label class="text-xs text-muted block mb-1.5">Email *</label><input id="f-em" type="email" class="inp" placeholder="email@company.com"/></div>
+          <div><label class="text-xs text-muted block mb-1.5">Phone *</label><input id="f-ph" class="inp" placeholder="+60 12-345 6789"/></div>
+        </div>
+      </section>
+
+      <!-- Guest list -->
+      <section>
+        <div class="text-[10px] font-bold tracking-[.2em] text-yellow-400 uppercase mb-4 flex items-center gap-2 pb-2 border-b border-rim">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"/></svg>
+          Guest List
+        </div>
+        <div id="guest-rows" class="space-y-2"></div>
+      </section>
+
+      <!-- Payment -->
+      <section>
+        <div class="text-[10px] font-bold tracking-[.2em] text-yellow-400 uppercase mb-4 flex items-center gap-2 pb-2 border-b border-rim">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg>
+          Payment Method
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <button id="pay-btn-qr" onclick="setPay('qr')" class="border-2 border-yellow-400/50 bg-yellow-400/8 rounded-2xl p-4 text-center transition-all">
+            <div class="text-2xl mb-1">📱</div>
+            <div class="font-semibold text-sm text-yellow-400">DuitNow QR</div>
+            <div class="text-xs text-muted mt-0.5">Scan & pay instantly</div>
+          </button>
+          <button id="pay-btn-bank" onclick="setPay('bank')" class="border-2 border-rim rounded-2xl p-4 text-center transition-all hover:border-yellow-400/25">
+            <div class="text-2xl mb-1">🏦</div>
+            <div class="font-semibold text-sm text-gray-300">Bank Transfer</div>
+            <div class="text-xs text-muted mt-0.5">Transfer + upload slip</div>
+          </button>
+        </div>
+        <div id="pay-qr-section">
+          <div class="flex flex-col items-center gap-3 p-6 bg-panel rounded-2xl border border-rim">
+            <p class="text-xs text-muted">Scan with any Malaysian banking app</p>
+            <div class="p-3 bg-white rounded-2xl"><div id="f-qr-code"></div></div>
+            <div class="text-center">
+              <div class="fd text-2xl font-black gt" id="f-qr-amount">RM 50,000</div>
+              <div class="text-xs text-muted mt-1">TMG Group Sdn Bhd · Maybank · 1234 5678 9012</div>
+            </div>
+          </div>
+        </div>
+        <div id="pay-bank-section" class="hidden space-y-3">
+          <div class="p-4 bg-panel rounded-xl border border-rim text-xs space-y-1.5">
+            <div class="font-semibold text-gray-300 mb-2">Bank Transfer Details</div>
+            <div class="flex gap-2"><span class="text-muted w-28">Bank</span><span class="text-gray-300">Maybank Berhad</span></div>
+            <div class="flex gap-2"><span class="text-muted w-28">Account Name</span><span class="text-gray-300">TMG Group Sdn Bhd</span></div>
+            <div class="flex gap-2"><span class="text-muted w-28">Account No</span><span class="text-gray-300">1234 5678 9012</span></div>
+            <div class="flex gap-2"><span class="text-muted w-28">Reference</span><span class="text-gray-300">TMGDINNER2026 + Co. Name</span></div>
+          </div>
+          <label class="flex flex-col items-center gap-2 p-5 border-2 border-dashed border-rim rounded-2xl cursor-pointer hover:border-yellow-400/35 transition-colors">
+            <svg class="w-7 h-7 text-yellow-400/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+            <span class="text-sm text-gray-400">Upload payment slip</span>
+            <span class="text-xs text-muted">JPG, PNG, PDF · Max 5MB</span>
+            <input type="file" class="hidden" accept="image/*,.pdf" onchange="document.getElementById('slip-fn').textContent='✓ '+this.files[0]?.name;document.getElementById('slip-fn').className='text-xs text-emerald-400'"/>
+            <span id="slip-fn" class="text-xs text-muted"></span>
+          </label>
+        </div>
+      </section>
+
+      <button onclick="submitReg()" class="btn-gold w-full py-3.5 flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+        Complete Registration
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ████████████████████████████████████████
+     CONFIRMATION PAGE
+████████████████████████████████████████ -->
+<div class="page" id="pg-confirm">
+  <div class="max-w-md mx-auto px-5 py-16 text-center">
+    <div class="surface rounded-3xl p-10 border-yellow-400/30" style="border-color:rgba(201,168,76,.3)">
+      <div class="text-5xl mb-5 float">🎉</div>
+      <div class="text-xs text-muted tracking-widest mb-1" id="c-tid">TMG-2026-XXX</div>
+      <div class="fd text-2xl font-bold mb-1" id="c-co">Company Name</div>
+      <div class="text-sm text-yellow-400 font-semibold mb-1" id="c-pkg">Gold Sponsor · RM 50,000</div>
+      <div class="text-xs text-muted mb-7" id="c-tbl">Table 1 · Gold VIP Zone · 10 seats</div>
+      <div class="flex justify-center mb-3"><div id="c-qr" class="p-3 bg-white rounded-2xl inline-block ap"></div></div>
+      <p class="text-xs text-muted mb-8">Present this QR at the entrance on event night</p>
+      <div class="flex gap-3 justify-center">
+        <button onclick="window.print()" class="btn-rim flex items-center gap-1.5 text-sm">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-6 0h.008v.008H12V10.5Zm-3 0h.008v.008H9V10.5Z"/></svg>
+          Print
+        </button>
+        <button onclick="goTo('pg-land')" class="btn-gold flex items-center gap-1.5 text-sm">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+          Back to Home
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████████████████████████████████████
+     ADMIN LOGIN
+████████████████████████████████████████ -->
+<div class="page" id="pg-adminlogin">
+  <div class="min-h-screen flex items-center justify-center p-6" style="background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(201,168,76,.08) 0%,transparent 60%)">
+    <div class="surface rounded-2xl p-10 w-full max-w-sm ap">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-yellow-400/10 border border-yellow-400/25 mb-4">
+          <svg class="w-7 h-7 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+        </div>
+        <div class="fd text-lg font-bold text-yellow-400 mb-1">Admin Portal</div>
+        <div class="text-xs text-muted">TMG Supplier Dinner 2026</div>
+      </div>
+      <div class="space-y-4">
+        <div><label class="text-xs text-muted block mb-1.5">Username</label><input id="al-user" class="inp" placeholder="admin" value="admin"/></div>
+        <div>
+          <label class="text-xs text-muted block mb-1.5">Password</label>
+          <div class="relative">
+            <input id="al-pass" class="inp pr-10" type="password" placeholder="••••••••" value="tmg2026" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
+            <button onclick="togglePass()" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-gray-300 transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="al-err" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/15 rounded-lg px-3 py-2">Invalid credentials.</div>
+        <button onclick="doAdminLogin()" class="btn-gold w-full py-3 flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/></svg>
+          Sign In
+        </button>
+        <div class="text-center text-xs text-muted/50">Demo: admin / tmg2026</div>
+        <button onclick="goTo('pg-land')" class="w-full text-center text-xs text-muted hover:text-gray-300 transition-colors">← Back to event page</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ████████████████████████████████████████
+     ADMIN DASHBOARD
+████████████████████████████████████████ -->
+<div class="page" id="pg-admin">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-56 flex-shrink-0 bg-panel border-r border-rim flex flex-col sticky top-0 h-screen overflow-y-auto">
+      <div class="px-4 py-4 border-b border-rim">
+        <div class="fd text-sm font-bold"><span class="gt">TMG</span><span class="text-gray-400 font-light"> Admin</span></div>
+        <div class="text-[10px] text-muted mt-0.5">Dinner 2026</div>
+      </div>
+      <div class="px-3 py-2 border-b border-rim flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-full bg-yellow-400/20 border border-yellow-400/25 flex items-center justify-center text-yellow-400 text-xs font-bold flex-shrink-0" id="a-avatar">A</div>
+        <div class="min-w-0"><div class="text-xs font-semibold text-gray-200 truncate" id="a-name">Admin</div><div class="text-[10px] text-muted">Super Admin</div></div>
+      </div>
+      <nav class="flex-1 px-2 py-3 space-y-0.5">
+        <div class="ni on" onclick="asec('overview')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>Overview
+        </div>
+        <div class="ni" onclick="asec('bookings')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"/></svg>Bookings
+          <span class="ml-auto bg-blue-500/20 text-blue-400 text-[9px] font-bold px-1.5 py-0.5 rounded-full" id="nb-book">0</span>
+        </div>
+        <div class="ni" onclick="asec('payments')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z"/></svg>Payments
+          <span class="ml-auto bg-amber-500/20 text-amber-400 text-[9px] font-bold px-1.5 py-0.5 rounded-full" id="nb-pay">0</span>
+        </div>
+        <div class="ni" onclick="asec('seating')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>Seating
+        </div>
+        <div class="ni" onclick="asec('checkin')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/></svg>Check-In
+        </div>
+        <div class="ni" onclick="asec('reports')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>Reports
+        </div>
+      </nav>
+      <div class="p-3 border-t border-rim">
+        <button onclick="adminLogout()" class="ni w-full text-red-500/60 hover:text-red-400 hover:bg-red-500/8">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 overflow-auto">
+      <!-- Header -->
+      <header class="sticky top-0 z-30 bg-ink/92 backdrop-blur-xl border-b border-rim px-6 py-3 flex items-center justify-between gap-4">
+        <div><div class="fd text-sm font-bold text-yellow-400" id="a-pg-title">Overview</div><div class="text-xs text-muted" id="a-pg-sub">Dashboard & key metrics</div></div>
+        <div class="flex items-center gap-2.5">
+          <div class="relative">
+            <input id="a-search" class="inp text-xs py-2 pl-8 pr-3 w-48" placeholder="Search…" oninput="aSearch(this.value)"/>
+            <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+          </div>
+          <button onclick="exportAll()" class="btn-rim text-xs py-2 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>Export CSV
+          </button>
+        </div>
+      </header>
+
+      <div class="p-6">
+        <!-- ── OVERVIEW ── -->
+        <div class="sec on" id="sec-overview">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="surface rounded-2xl p-5"><div class="text-xs text-muted uppercase tracking-wider mb-2">Total Sponsors</div><div class="fd text-3xl font-bold gt" id="as-total">0</div><div class="text-xs text-muted mt-0.5">all packages</div></div>
+            <div class="surface rounded-2xl p-5"><div class="text-xs text-muted uppercase tracking-wider mb-2">Pax Registered</div><div class="fd text-3xl font-bold text-blue-400" id="as-pax">0</div><div class="text-xs text-muted mt-0.5">of 1,000 capacity</div></div>
+            <div class="surface rounded-2xl p-5"><div class="text-xs text-muted uppercase tracking-wider mb-2">Revenue (Paid)</div><div class="fd text-3xl font-bold text-emerald-400" id="as-rev">RM 0</div><div class="prog mt-2"><div class="prog-fill" id="as-rev-bar" style="width:0%"></div></div></div>
+            <div class="surface rounded-2xl p-5"><div class="text-xs text-muted uppercase tracking-wider mb-2">Pending Approval</div><div class="fd text-3xl font-bold text-amber-400" id="as-pend">0</div><div class="text-xs text-muted mt-0.5">need action</div></div>
+          </div>
+
+          <!-- Package breakdown + recent -->
+          <div class="grid lg:grid-cols-5 gap-5 mb-5">
+            <div class="surface rounded-2xl p-5 lg:col-span-2">
+              <div class="font-semibold text-sm text-gray-200 mb-4">By Package</div>
+              <div class="space-y-3" id="pkg-breakdown"></div>
+            </div>
+            <div class="surface rounded-2xl overflow-hidden lg:col-span-3">
+              <div class="px-5 py-4 border-b border-rim flex items-center justify-between">
+                <div class="font-semibold text-sm text-gray-200">Recent Registrations</div>
+                <button onclick="asec('bookings')" class="text-xs text-yellow-400 hover:underline">All →</button>
+              </div>
+              <div id="ov-recent" class="overflow-x-auto"></div>
+            </div>
+          </div>
+
+          <!-- Capacity progress -->
+          <div class="surface rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="flex-shrink-0"><div class="font-semibold text-sm text-gray-200">Venue Capacity</div><div class="text-xs text-muted mt-0.5" id="cap-label">0 / 1,000 seats</div></div>
+            <div class="flex-1"><div class="prog"><div class="prog-fill" id="cap-bar" style="width:0%"></div></div></div>
+            <div class="text-sm font-bold text-yellow-400" id="cap-pct">0%</div>
+          </div>
+        </div>
+
+        <!-- ── BOOKINGS ── -->
+        <div class="sec" id="sec-bookings">
+          <div class="flex flex-wrap gap-2 mb-4 items-center">
+            <div class="flex gap-0.5 p-1 bg-card border border-rim rounded-xl">
+              <button class="pt on" onclick="bFilter('all',this)">All <span id="bc-all" class="text-muted ml-1">0</span></button>
+              <button class="pt" onclick="bFilter('paid',this)">Paid <span id="bc-paid" class="text-muted ml-1">0</span></button>
+              <button class="pt" onclick="bFilter('pending',this)">Pending <span id="bc-pend" class="text-muted ml-1">0</span></button>
+              <button class="pt" onclick="bFilter('review',this)">Review <span id="bc-rev" class="text-muted ml-1">0</span></button>
+            </div>
+            <select id="bf-pkg" onchange="renderBookings()" class="inp py-2 text-xs w-36 ml-auto">
+              <option value="">All Packages</option>
+              <option value="gold">⭐ Gold</option>
+              <option value="silver">🥈 Silver</option>
+              <option value="bronze">🥉 Bronze</option>
+            </select>
+            <input id="bf-search" oninput="renderBookings()" class="inp py-2 text-xs w-40" placeholder="Search…"/>
+          </div>
+          <div class="surface rounded-2xl overflow-hidden"><div id="bookings-tbl" class="overflow-x-auto"></div></div>
+        </div>
+
+        <!-- ── PAYMENTS ── -->
+        <div class="sec" id="sec-payments">
+          <div class="grid sm:grid-cols-3 gap-4 mb-5">
+            <div class="surface rounded-2xl p-5"><div class="text-xs text-muted mb-1">Pending</div><div class="fd text-2xl font-bold text-amber-400" id="pp-pend">0</div></div>
+            <div class="surface rounded-2xl p-5"><div class="text-xs text-muted mb-1">Verified</div><div class="fd text-2xl font-bold text-emerald-400" id="pp-paid">0</div></div>
+            <div class="surface rounded-2xl p-5"><div class="text-xs text-muted mb-1">Total Collected</div><div class="fd text-2xl font-bold gt" id="pp-total">RM 0</div></div>
+          </div>
+          <div class="surface rounded-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-rim font-semibold text-sm text-gray-200">Payment Queue</div>
+            <div id="payments-tbl" class="overflow-x-auto"></div>
+          </div>
+        </div>
+
+        <!-- ── SEATING ── -->
+        <div class="sec" id="sec-seating">
+          <div class="text-center py-3 rounded-2xl border border-yellow-400/20 bg-yellow-400/4 mb-5 fd text-xs tracking-widest text-yellow-400">✦ MAIN STAGE ✦</div>
+          <div id="admin-seat-grid" class="grid gap-2.5" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))"></div>
+        </div>
+
+        <!-- ── CHECK-IN ── -->
+        <div class="sec" id="sec-checkin">
+          <div class="grid lg:grid-cols-2 gap-5">
+            <div>
+              <div class="surface rounded-2xl p-6 mb-4">
+                <div class="font-semibold text-sm text-gray-200 mb-4 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5Z"/></svg>
+                  Guest QR Check-In
+                </div>
+                <div class="relative w-40 h-40 mx-auto rounded-2xl bg-panel border-2 border-yellow-400/30 flex items-center justify-center overflow-hidden mb-4">
+                  <div class="scan-line"></div>
+                  <svg class="w-14 h-14 text-yellow-400/15" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width=".8" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/></svg>
+                </div>
+                <div class="flex gap-2 mb-3">
+                  <input id="ci-inp" class="inp text-xs py-2 flex-1" placeholder="Ticket code e.g. TMG-2026-001" onkeydown="if(event.key==='Enter')doCI()"/>
+                  <button onclick="doCI()" class="btn-gold text-xs px-4">✓ Check In</button>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button onclick="dCI('TMG-2026-001')" class="text-xs border border-yellow-400/25 text-yellow-400/80 px-2.5 py-1 rounded-lg hover:bg-yellow-400/8">Nestle Demo</button>
+                  <button onclick="dCI('TMG-2026-003')" class="text-xs border border-yellow-400/25 text-yellow-400/80 px-2.5 py-1 rounded-lg hover:bg-yellow-400/8">Unilever Demo</button>
+                  <button onclick="dCI('BADCODE')" class="text-xs border border-red-500/25 text-red-400/70 px-2.5 py-1 rounded-lg hover:bg-red-500/8">Invalid Demo</button>
+                </div>
+              </div>
+              <div id="ci-result" class="hidden surface rounded-2xl p-5 text-center ap"></div>
+            </div>
+            <div class="surface rounded-2xl overflow-hidden">
+              <div class="px-5 py-4 border-b border-rim flex justify-between items-center">
+                <div class="font-semibold text-sm text-gray-200">Check-In Log</div>
+                <div class="text-xs text-muted"><span class="text-purple-400 font-semibold" id="ci-cnt">0</span> guests in</div>
+              </div>
+              <div id="ci-log" class="divide-y divide-rim max-h-80 overflow-y-auto">
+                <div class="px-5 py-8 text-center text-xs text-muted">No check-ins yet today</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── REPORTS ── -->
+        <div class="sec" id="sec-reports">
+          <div class="grid sm:grid-cols-3 gap-4 mb-6">
+            <button onclick="exportAll()" class="surface rounded-2xl p-5 text-left hover:border-yellow-400/25 transition-colors group">
+              <div class="w-9 h-9 rounded-xl bg-yellow-400/8 text-yellow-400 flex items-center justify-center mb-3 group-hover:bg-yellow-400/15 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+              </div>
+              <div class="font-semibold text-sm">Full Sponsor List</div>
+              <div class="text-xs text-muted mt-1">All registrations CSV</div>
+              <div class="text-xs text-yellow-400 mt-2">Download →</div>
+            </button>
+            <button onclick="exportPayments()" class="surface rounded-2xl p-5 text-left hover:border-emerald-400/20 transition-colors group">
+              <div class="w-9 h-9 rounded-xl bg-emerald-500/8 text-emerald-400 flex items-center justify-center mb-3 group-hover:bg-emerald-500/15 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              </div>
+              <div class="font-semibold text-sm">Revenue Report</div>
+              <div class="text-xs text-muted mt-1">Payment status by tier</div>
+              <div class="text-xs text-emerald-400 mt-2">Download →</div>
+            </button>
+            <button onclick="exportSeating()" class="surface rounded-2xl p-5 text-left hover:border-blue-400/20 transition-colors group">
+              <div class="w-9 h-9 rounded-xl bg-blue-500/8 text-blue-400 flex items-center justify-center mb-3 group-hover:bg-blue-500/15 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6Z"/></svg>
+              </div>
+              <div class="font-semibold text-sm">Seating Plan</div>
+              <div class="text-xs text-muted mt-1">Table assignments CSV</div>
+              <div class="text-xs text-blue-400 mt-2">Download →</div>
+            </button>
+          </div>
+          <div class="surface rounded-2xl overflow-hidden">
+            <div class="px-5 py-4 border-b border-rim font-semibold text-sm text-gray-200">Management Summary</div>
+            <div id="rep-summary" class="overflow-x-auto"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ████████████████████████████████████████
+     BOOKING DETAIL MODAL
+████████████████████████████████████████ -->
+<div id="modal-bk" class="modal-wrap hidden" onclick="if(event.target===this)closeModal()">
+  <div class="surface rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto ap">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-rim sticky top-0 bg-card z-10">
+      <div class="fd text-base font-bold text-yellow-400">Booking Details</div>
+      <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-rim flex items-center justify-center text-muted hover:text-gray-200 transition-colors">✕</button>
+    </div>
+    <div id="modal-bk-body" class="p-6 space-y-5"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 right-6 z-[300] hidden items-center gap-3 px-5 py-3 rounded-2xl border text-sm font-medium shadow-2xl max-w-xs" style="animation:fadeUp .3s ease"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  SHARED DATA STORE  (in production → MySQL via API)
+// ═══════════════════════════════════════════════════════
+const PKG = {
+  gold:  {label:'⭐ Gold',   price:50000, seats:10, zone:'Gold VIP', bc:'b-gold',   col:'text-yellow-400'},
+  silver:{label:'🥈 Silver', price:30000, seats:6,  zone:'Silver',   bc:'b-silver', col:'text-slate-300'},
+  bronze:{label:'🥉 Bronze', price:10000, seats:2,  zone:'Bronze',   bc:'b-bronze', col:'text-orange-400'},
+};
+
+// Seed bookings
+let BOOKINGS = [
+  {id:1,tid:'TMG-2026-001',co:'Nestle Malaysia Berhad',    cp:'Ahmad Zulkifli',  des:'CEO',      em:'ahmad@nestle.com.my',    ph:'+60123456789',pkg:'gold',  tbl:1, pax:10,pay:'paid',   ci:false,reg:'2026-08-12',guests:['Ahmad Zulkifli','Mohd Rizal','Siti Aisyah','Farah Nur','Lim Wei','Chen Yi','Raj Kumar','Aishah Bt','Zulkefli H','Nora M']},
+  {id:2,tid:'TMG-2026-002',co:'Dutch Lady Industries',     cp:'Priya Raman',     des:'GM Sales', em:'priya@dutchlady.com.my', ph:'+60198765432',pkg:'gold',  tbl:2, pax:10,pay:'paid',   ci:false,reg:'2026-08-13',guests:['Priya Raman','Vikram S','Sushila D','Ang Boon','Tan Mei','Yap Kian','Ho Siew','Fatimah R','Azman J','Halim O']},
+  {id:3,tid:'TMG-2026-003',co:'Unilever Malaysia',         cp:'Tan Wei Ming',    des:'Director', em:'tanwm@unilever.com.my',  ph:'+60111234567',pkg:'silver',tbl:9, pax:6, pay:'paid',   ci:false,reg:'2026-08-14',guests:['Tan Wei Ming','Nurul H','Rashid K','Yee Lin','Benedict T','Hamidah N']},
+  {id:4,tid:'TMG-2026-004',co:'F&N Beverages Marketing',   cp:'Siti Zainab',     des:'Manager',  em:'siti@fn.com.my',         ph:'+60129876543',pkg:'silver',tbl:10,pax:6, pay:'pending',ci:false,reg:'2026-08-15',guests:['Siti Zainab','Amirul H','Datin N','Roslan M','Yazmin A','Farid B']},
+  {id:5,tid:'TMG-2026-005',co:'Mamee-Double Decker',       cp:'Lim Kok Weng',    des:'VP Ops',   em:'limkw@mamee.com.my',     ph:'+60134567890',pkg:'bronze',tbl:25,pax:2, pay:'paid',   ci:false,reg:'2026-08-16',guests:['Lim Kok Weng','Jessie Tan']},
+  {id:6,tid:'TMG-2026-006',co:'Gardenia Bakeries KL',      cp:'Mohd Hafiz',      des:'COO',      em:'hafiz@gardenia.com.my',  ph:'+60145678901',pkg:'bronze',tbl:26,pax:2, pay:'review', ci:false,reg:'2026-08-17',guests:['Mohd Hafiz','Nor Azlina']},
+  {id:7,tid:'TMG-2026-007',co:'Spritzer Bhd',              cp:'Lee Siew Fun',    des:'MD',       em:'leesf@spritzer.com.my',  ph:'+60156789012',pkg:'silver',tbl:11,pax:6, pay:'paid',   ci:false,reg:'2026-08-18',guests:['Lee Siew Fun','Chin Kuan','Wong Bee','Suraya H','Azmeer A','Divya N']},
+  {id:8,tid:'TMG-2026-008',co:'Power Root Bhd',            cp:'Razali Othman',   des:'Chairman', em:'razali@powerroot.com.my',ph:'+60167890123',pkg:'bronze',tbl:27,pax:2, pay:'pending',ci:false,reg:'2026-08-19',guests:['Razali Othman','Norzaihan R']},
+  {id:9,tid:'TMG-2026-009',co:'Yeo Hiap Seng Malaysia',    cp:'Kevin Tan',       des:'CEO',      em:'kevin@yhs.com.my',       ph:'+60178901234',pkg:'silver',tbl:12,pax:6, pay:'paid',   ci:false,reg:'2026-08-20',guests:['Kevin Tan','Alice Ng','David Lim','Sarah K','Marcus W','Jenny H']},
+  {id:10,tid:'TMG-2026-010',co:"Brahim's SATS Food",       cp:'Dato Rauf',       des:'Exec Dir', em:'rauf@brahims.com.my',    ph:'+60189012345',pkg:'gold',  tbl:3, pax:10,pay:'paid',   ci:false,reg:'2026-08-21',guests:["Dato Rauf","Datin Zaiha","Aizuddin M","Fauzan R","Sabrina H","Nabilah Y","Imran K","Zulfa A","Hasnah B","Adli N"]},
+];
+
+const TAKEN_TABLES = new Set(BOOKINGS.map(b=>b.tbl));
+const ADMINS = [{u:'admin',p:'tmg2026',n:'Admin'},{u:'itadmin',p:'tmg@it',n:'IT Admin'},{u:'dato',p:'dato123',n:'Dato (Read Only)'}];
+let currentAdmin = null, currentPkg = null, selectedTable = null;
+let bFilterVal = 'all', ciLog = [], ticketN = 100;
+let scale = 1;
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goTo(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showAdminLogin() { goTo('pg-adminlogin'); }
+
+// ═══════════════════════════════════════════════════════
+//  SUPPLIER FLOW
+// ═══════════════════════════════════════════════════════
+function selectPkg(pkg) {
+  currentPkg = pkg; selectedTable = null;
+  buildVenue(pkg);
+  const p = PKG[pkg];
+  document.getElementById('seat-pkg-label').textContent = p.label + ' – RM ' + p.price.toLocaleString();
+  document.getElementById('side-pkg-name').textContent = p.label;
+  document.getElementById('side-pkg-price').textContent = 'RM ' + p.price.toLocaleString();
+  document.getElementById('side-pkg-info').textContent = 'Select 1 table · ' + p.seats + ' seats';
+  document.getElementById('seat-confirm-btn').classList.add('hidden');
+  document.getElementById('seat-selected-badge').classList.add('hidden');
+  document.getElementById('side-selected').classList.add('hidden');
+  document.getElementById('side-confirm-btn').disabled = true;
+  document.getElementById('side-confirm-btn').classList.add('opacity-40','cursor-not-allowed');
+  goTo('pg-seats');
+}
+
+// ── Build venue ──────────────────────────────────────
+const ZONES = {gold:{count:8,start:1,cap:10},silver:{count:16,start:9,cap:6},bronze:{count:30,start:25,cap:2}};
+function buildVenue(pkg) {
+  ['gold','silver','bronze'].forEach(z=>{
+    const c = document.getElementById('zone-'+z);
+    c.innerHTML='';
+    const {count,start,cap} = ZONES[z];
+    const eligible = PKG[pkg] && z===pkg;
+    for(let i=0;i<count;i++){
+      const n=start+i, taken=TAKEN_TABLES.has(n);
+      c.appendChild(makeTable(n,z,taken,eligible,cap));
+    }
+    const sec=document.getElementById('zone-'+z).closest('.mb-10')||document.getElementById('zone-'+z).parentElement;
+    sec.style.opacity=eligible?'1':'0.45';
+    sec.style.filter=eligible?'none':'grayscale(50%)';
+  });
+}
+function makeTable(n,zone,taken,eligible,cap){
+  const wrap=document.createElement('div');
+  wrap.className='flex flex-col items-center gap-1.5';
+  const sz=zone==='gold'?76:zone==='silver'?62:50;
+  const tbl=document.createElement('div');
+  tbl.id='tbl-'+n;
+  tbl.className='tbl '+(taken?'tbl-taken':eligible?'tbl-'+zone:'tbl-'+zone+' opacity-40 cursor-not-allowed');
+  tbl.style.cssText=`width:${sz}px;height:${sz}px`;
+  tbl.innerHTML=`<span style="font-size:${zone==='gold'?11:9}px">T${n}</span><span style="font-size:8px;opacity:.6">${cap}px</span>${taken?'<span style="font-size:8px;opacity:.5">Taken</span>':''}`;
+  if(!taken&&eligible) tbl.onclick=()=>pickTable(n,zone,cap);
+  // dots
+  const dots=document.createElement('div');
+  dots.className='flex gap-0.5 flex-wrap justify-center';
+  for(let d=0;d<Math.min(cap,10);d++){
+    const dot=document.createElement('span');
+    const s=zone==='gold'?6:zone==='silver'?5:4;
+    dot.style.cssText=`width:${s}px;height:${s}px;border-radius:50%;display:inline-block;background:${taken?'#1E1E1E':zone==='gold'?'#6A5010':zone==='silver'?'#3A4A5A':'#5A3010'}`;
+    dots.appendChild(dot);
+  }
+  wrap.appendChild(tbl); wrap.appendChild(dots);
+  return wrap;
+}
+function pickTable(n,zone,cap){
+  if(selectedTable){
+    const prev=document.getElementById('tbl-'+selectedTable.n);
+    if(prev){prev.classList.remove('tbl-selected');prev.className='tbl tbl-'+selectedTable.zone;}
+  }
+  selectedTable={n,zone,cap};
+  const el=document.getElementById('tbl-'+n);
+  el.classList.add('tbl-selected');
+  const zl={gold:'Gold VIP Zone',silver:'Silver Front',bronze:'Bronze General'};
+  document.getElementById('seat-confirm-btn').classList.remove('hidden');
+  document.getElementById('seat-selected-badge').classList.remove('hidden');
+  document.getElementById('seat-selected-badge').textContent='Table '+n+' selected';
+  document.getElementById('side-selected').classList.remove('hidden');
+  document.getElementById('side-tnum').textContent='T'+n;
+  document.getElementById('side-tname').textContent='Table '+n;
+  document.getElementById('side-tzone').textContent=zl[zone];
+  document.getElementById('side-tseats').textContent=cap;
+  document.getElementById('side-tzoneV').textContent=zone.charAt(0).toUpperCase()+zone.slice(1);
+  document.getElementById('side-confirm-btn').disabled=false;
+  document.getElementById('side-confirm-btn').classList.remove('opacity-40','cursor-not-allowed');
+  toast('Table '+n+' selected – '+cap+' seats');
+}
+function confirmTable(){
+  if(!selectedTable){toast('Please select a table','warn');return;}
+  const p=PKG[currentPkg];
+  const zl={gold:'Gold VIP Zone',silver:'Silver Front Section',bronze:'Bronze General'};
+  document.getElementById('sum-tnum').textContent='T'+selectedTable.n;
+  document.getElementById('sum-desc').textContent='Table '+selectedTable.n+' – '+zl[selectedTable.zone];
+  document.getElementById('sum-pkg').textContent=p.label+' · RM '+p.price.toLocaleString()+' · '+p.seats+' seats';
+  document.getElementById('f-qr-amount').textContent='RM '+p.price.toLocaleString();
+  buildGuestRows(p.seats);
+  genQR(p.price,'f-qr-code');
+  goTo('pg-form');
+}
+
+// ── Guest rows ────────────────────────────────────────
+function buildGuestRows(n){
+  const c=document.getElementById('guest-rows'); c.innerHTML='';
+  for(let i=1;i<=n;i++){
+    const r=document.createElement('div');
+    r.className='grid grid-cols-3 gap-2 p-3 bg-panel rounded-xl border border-rim';
+    r.innerHTML=`<div><label class="text-xs text-muted block mb-1">Guest ${i}</label><input class="inp text-xs py-2" placeholder="Full name"/></div>
+    <div><label class="text-xs text-muted block mb-1">Position</label><input class="inp text-xs py-2" placeholder="CEO"/></div>
+    <div><label class="text-xs text-muted block mb-1">Dietary</label><select class="inp text-xs py-2"><option>Standard</option><option>Vegetarian</option><option>Halal Only</option><option>No Pork</option><option>Vegan</option></select></div>`;
+    c.appendChild(r);
+  }
+}
+
+// ── Payment switch ────────────────────────────────────
+function setPay(m){
+  document.getElementById('pay-btn-qr').className='border-2 rounded-2xl p-4 text-center transition-all '+(m==='qr'?'border-yellow-400/50 bg-yellow-400/8':'border-rim hover:border-yellow-400/20');
+  document.getElementById('pay-btn-bank').className='border-2 rounded-2xl p-4 text-center transition-all '+(m==='bank'?'border-yellow-400/50 bg-yellow-400/8':'border-rim hover:border-yellow-400/20');
+  document.getElementById('pay-qr-section').classList.toggle('hidden',m!=='qr');
+  document.getElementById('pay-bank-section').classList.toggle('hidden',m!=='bank');
+}
+
+// ── Submit registration ───────────────────────────────
+function submitReg(){
+  const co=document.getElementById('f-co').value.trim();
+  const cp=document.getElementById('f-cp').value.trim();
+  const em=document.getElementById('f-em').value.trim();
+  const ph=document.getElementById('f-ph').value.trim();
+  if(!co||!cp||!em||!ph){toast('Please fill in all required fields','warn');return;}
+  ticketN++;
+  const tid='TMG-2026-'+ticketN;
+  const p=PKG[currentPkg];
+  const entry={
+    id:BOOKINGS.length+1,tid,co,cp,des:document.getElementById('f-des').value||'',
+    em,ph,pkg:currentPkg,tbl:selectedTable.n,pax:p.seats,
+    pay:'pending',ci:false,
+    reg:new Date().toISOString().slice(0,10),
+    guests:Array.from({length:p.seats},(_,i)=>'Guest '+(i+1))
+  };
+  BOOKINGS.push(entry);
+  TAKEN_TABLES.add(selectedTable.n);
+  // Confirm page
+  document.getElementById('c-tid').textContent=tid;
+  document.getElementById('c-co').textContent=co;
+  document.getElementById('c-pkg').textContent=p.label+' · RM '+p.price.toLocaleString();
+  document.getElementById('c-tbl').textContent='Table '+selectedTable.n+' · '+PKG[currentPkg].zone+' Zone · '+p.seats+' seats';
+  genQR(tid+'|'+co+'|Table'+selectedTable.n+'|'+p.label,'c-qr');
+  updateLandStats();
+  goTo('pg-confirm');
+  toast('Registration submitted! Ticket: '+tid);
+}
+
+// ── QR Generator ──────────────────────────────────────
+function genQR(data,elId){
+  const el=document.getElementById(elId); el.innerHTML='';
+  new QRCode(el,{text:String(data),width:160,height:160,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
+}
+
+// ── Update landing stats ──────────────────────────────
+function updateLandStats(){
+  const pax=BOOKINGS.reduce((a,b)=>a+b.pax,0);
+  document.getElementById('land-pax').textContent=pax;
+  document.getElementById('land-sponsors').textContent=BOOKINGS.length;
+}
+
+// ── Venue zoom/pan ────────────────────────────────────
+const vw=document.getElementById('venue-wrap');
+const vi=document.getElementById('venue-inner');
+vw.addEventListener('wheel',e=>{e.preventDefault();scale=Math.max(.5,Math.min(2,scale-e.deltaY*.001));vi.style.transform=`scale(${scale})`;},{passive:false});
+let pan=false,sx,sy,sl,st;
+vw.addEventListener('mousedown',e=>{pan=true;sx=e.pageX-vw.offsetLeft;sy=e.pageY-vw.offsetTop;sl=vw.scrollLeft;st=vw.scrollTop;});
+vw.addEventListener('mouseleave',()=>pan=false);
+vw.addEventListener('mouseup',()=>pan=false);
+vw.addEventListener('mousemove',e=>{if(!pan)return;e.preventDefault();vw.scrollLeft=sl-(e.pageX-vw.offsetLeft-sx);vw.scrollTop=st-(e.pageY-vw.offsetTop-sy);});
+function resetVenue(){scale=1;vi.style.transform='scale(1)';vw.scrollLeft=0;vw.scrollTop=0;}
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN AUTH
+// ═══════════════════════════════════════════════════════
+function doAdminLogin(){
+  const u=document.getElementById('al-user').value.trim();
+  const p=document.getElementById('al-pass').value;
+  const found=ADMINS.find(a=>a.u===u&&a.p===p);
+  if(found){
+    currentAdmin=found;
+    document.getElementById('a-name').textContent=found.n;
+    document.getElementById('a-avatar').textContent=found.n.charAt(0);
+    goTo('pg-admin');
+    initAdminDash();
+    toast('Welcome, '+found.n+'!');
+  } else {
+    document.getElementById('al-err').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('al-err').classList.add('hidden'),3000);
+  }
+}
+function adminLogout(){currentAdmin=null;goTo('pg-land');}
+function togglePass(){const i=document.getElementById('al-pass');i.type=i.type==='password'?'text':'password';}
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN SECTIONS
+// ═══════════════════════════════════════════════════════
+const SEC_TITLES={overview:['Overview','Dashboard & key metrics'],bookings:['All Bookings','Sponsor registration list'],payments:['Payments','Approve & track payments'],seating:['Seating Plan','Table assignments'],checkin:['Check-In','Event day attendance'],reports:['Reports & Exports','Download data']};
+function asec(id){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  const ni=[...document.querySelectorAll('.ni')].find(n=>n.getAttribute('onclick')===`asec('${id}')`);
+  if(ni)ni.classList.add('on');
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');
+  const [t,s]=SEC_TITLES[id];
+  document.getElementById('a-pg-title').textContent=t;
+  document.getElementById('a-pg-sub').textContent=s;
+  if(id==='bookings')renderBookings();
+  if(id==='payments')renderPayments();
+  if(id==='seating')renderAdminSeating();
+  if(id==='reports')renderReports();
+}
+
+// ═══════════════════════════════════════════════════════
+//  ADMIN DASHBOARD INIT
+// ═══════════════════════════════════════════════════════
+function initAdminDash(){
+  const paid=BOOKINGS.filter(b=>b.pay==='paid');
+  const rev=paid.reduce((a,b)=>a+PKG[b.pkg].price,0);
+  const pax=BOOKINGS.reduce((a,b)=>a+b.pax,0);
+  const pend=BOOKINGS.filter(b=>b.pay!=='paid').length;
+  document.getElementById('as-total').textContent=BOOKINGS.length;
+  document.getElementById('as-pax').textContent=pax;
+  document.getElementById('as-rev').textContent='RM '+fmt(rev);
+  document.getElementById('as-rev-bar').style.width=(rev/2500000*100).toFixed(1)+'%';
+  document.getElementById('as-pend').textContent=pend;
+  document.getElementById('nb-book').textContent=BOOKINGS.length;
+  document.getElementById('nb-pay').textContent=pend;
+  const capPct=Math.round(pax/1000*100);
+  document.getElementById('cap-label').textContent=pax+' / 1,000 seats';
+  document.getElementById('cap-bar').style.width=capPct+'%';
+  document.getElementById('cap-pct').textContent=capPct+'%';
+  // Package breakdown
+  const pb=document.getElementById('pkg-breakdown'); pb.innerHTML='';
+  ['gold','silver','bronze'].forEach(k=>{
+    const all=BOOKINGS.filter(b=>b.pkg===k);
+    const p=PKG[k];
+    const r=document.createElement('div');
+    r.className='flex items-center gap-3';
+    r.innerHTML=`<span class="badge ${p.bc} flex-shrink-0">${p.label}</span><div class="flex-1"><div class="prog"><div class="prog-fill" style="width:${Math.min(100,(all.length/15)*100)}%;background:${k==='gold'?'#C9A84C':k==='silver'?'#94A3B8':'#CD7F32'}"></div></div></div><span class="text-xs text-gray-400 flex-shrink-0 w-14 text-right">${all.length} · RM ${fmt(all.length*p.price/1000)}K</span>`;
+    pb.appendChild(r);
+  });
+  // Recent mini table
+  const rows=BOOKINGS.slice(-5).reverse().map(b=>`<tr class="tr border-t border-rim cursor-pointer" onclick="openModal(${b.id})"><td class="px-4 py-3 text-xs font-medium text-gray-100">${b.co.split(' ').slice(0,3).join(' ')}<div class="text-[10px] text-muted">${b.tid}</div></td><td class="px-4 py-3"><span class="badge ${PKG[b.pkg].bc}" style="font-size:10px">${PKG[b.pkg].label}</span></td><td class="px-4 py-3"><span class="badge b-${b.pay}" style="font-size:10px">${b.pay}</span></td></tr>`).join('');
+  document.getElementById('ov-recent').innerHTML=`<table class="w-full"><thead><tr class="bg-panel"><th class="px-4 py-2.5 text-left text-[10px] text-muted uppercase tracking-wider font-medium">Company</th><th class="px-4 py-2.5 text-left text-[10px] text-muted uppercase tracking-wider font-medium">Package</th><th class="px-4 py-2.5 text-left text-[10px] text-muted uppercase tracking-wider font-medium">Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  BOOKINGS TABLE
+// ═══════════════════════════════════════════════════════
+function bFilter(f,el){bFilterVal=f;document.querySelectorAll('.pt').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderBookings();}
+function renderBookings(){
+  const srch=(document.getElementById('bf-search')?.value||'').toLowerCase();
+  const pkg=document.getElementById('bf-pkg')?.value||'';
+  const data=BOOKINGS.filter(b=>{
+    const mf=bFilterVal==='all'||b.pay===bFilterVal;
+    const ms=!srch||b.co.toLowerCase().includes(srch)||b.tid.toLowerCase().includes(srch)||b.cp.toLowerCase().includes(srch);
+    const mp=!pkg||b.pkg===pkg;
+    return mf&&ms&&mp;
+  });
+  document.getElementById('bc-all').textContent=BOOKINGS.length;
+  document.getElementById('bc-paid').textContent=BOOKINGS.filter(b=>b.pay==='paid').length;
+  document.getElementById('bc-pend').textContent=BOOKINGS.filter(b=>b.pay==='pending').length;
+  document.getElementById('bc-rev').textContent=BOOKINGS.filter(b=>b.pay==='review').length;
+  const rows=data.map(b=>`<tr class="tr border-t border-rim cursor-pointer" onclick="openModal(${b.id})">
+    <td class="px-5 py-3.5"><div class="font-medium text-sm text-gray-100">${b.co}</div><div class="text-xs text-muted">${b.tid}</div></td>
+    <td class="px-5 py-3.5 text-sm text-gray-300">${b.cp}<div class="text-xs text-muted">${b.des}</div></td>
+    <td class="px-5 py-3.5"><span class="badge ${PKG[b.pkg].bc}">${PKG[b.pkg].label}</span></td>
+    <td class="px-5 py-3.5 text-sm text-gray-300">T${b.tbl}</td>
+    <td class="px-5 py-3.5 text-sm text-gray-300">${b.pax}</td>
+    <td class="px-5 py-3.5"><span class="badge b-${b.pay}">${b.pay.charAt(0).toUpperCase()+b.pay.slice(1)}</span></td>
+    <td class="px-5 py-3.5"><span class="text-xs ${b.ci?'text-purple-400':'text-muted'}">${b.ci?'✓ In':'—'}</span></td>
+    <td class="px-5 py-3.5 text-xs text-muted">${b.reg}</td>
+    <td class="px-5 py-3.5">
+      <div class="flex gap-1.5" onclick="event.stopPropagation()">
+        ${b.pay!=='paid'?`<button onclick="approvePay(${b.id})" class="btn-ok text-xs py-1 px-2.5">✓</button>`:''}
+        <button onclick="openModal(${b.id})" class="btn-rim text-xs py-1 px-2.5">View</button>
+      </div>
+    </td>
+  </tr>`).join('');
+  document.getElementById('bookings-tbl').innerHTML=`<table class="w-full"><thead><tr class="bg-panel">${['Company','Contact','Package','Table','Pax','Payment','CI','Date','Actions'].map(h=>`<th class="px-5 py-3 text-left text-xs text-muted font-medium uppercase tracking-wider whitespace-nowrap">${h}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="9" class="px-5 py-10 text-center text-xs text-muted">No records</td></tr>'}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  PAYMENTS
+// ═══════════════════════════════════════════════════════
+function renderPayments(){
+  const paid=BOOKINGS.filter(b=>b.pay==='paid');
+  const pend=BOOKINGS.filter(b=>b.pay!=='paid');
+  document.getElementById('pp-pend').textContent=pend.length;
+  document.getElementById('pp-paid').textContent=paid.length;
+  document.getElementById('pp-total').textContent='RM '+fmt(paid.reduce((a,b)=>a+PKG[b.pkg].price,0));
+  const rows=[...pend,...paid].map(b=>`<tr class="tr border-t border-rim">
+    <td class="px-5 py-4"><div class="font-medium text-sm text-gray-100">${b.co}</div><div class="text-xs text-muted">${b.tid}</div></td>
+    <td class="px-5 py-4"><span class="badge ${PKG[b.pkg].bc}">${PKG[b.pkg].label}</span></td>
+    <td class="px-5 py-4 font-semibold text-sm ${b.pay==='paid'?'text-emerald-400':'text-gray-200'}">RM ${fmt(PKG[b.pkg].price)}</td>
+    <td class="px-5 py-4"><span class="badge b-${b.pay}">${b.pay.charAt(0).toUpperCase()+b.pay.slice(1)}</span></td>
+    <td class="px-5 py-4 text-xs text-muted">${b.reg}</td>
+    <td class="px-5 py-4">
+      ${b.pay!=='paid'?`<div class="flex gap-1.5"><button onclick="approvePay(${b.id})" class="btn-ok text-xs py-1.5 px-3">✓ Approve</button><button onclick="rejectPay(${b.id})" class="btn-warn text-xs py-1.5 px-3">✕ Reject</button></div>`:`<span class="text-xs text-emerald-400">Verified ✓</span>`}
+    </td>
+  </tr>`).join('');
+  document.getElementById('payments-tbl').innerHTML=`<table class="w-full"><thead><tr class="bg-panel">${['Company','Package','Amount','Status','Date','Action'].map(h=>`<th class="px-5 py-3 text-left text-xs text-muted font-medium uppercase tracking-wider">${h}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+function approvePay(id){const b=BOOKINGS.find(x=>x.id===id);if(!b)return;b.pay='paid';toast('✓ Payment approved – '+b.co);renderPayments();renderBookings();initAdminDash();}
+function rejectPay(id){const b=BOOKINGS.find(x=>x.id===id);if(!b)return;b.pay='rejected';toast('Payment rejected','warn');renderPayments();renderBookings();initAdminDash();}
+
+// ═══════════════════════════════════════════════════════
+//  SEATING (admin view)
+// ═══════════════════════════════════════════════════════
+function renderAdminSeating(){
+  const g=document.getElementById('admin-seat-grid'); g.innerHTML='';
+  for(let t=1;t<=54;t++){
+    const z=t<=8?'gold':t<=24?'silver':'bronze';
+    const b=BOOKINGS.find(x=>x.tbl===t);
+    const colBorder=b?z==='gold'?'border-yellow-400/30':z==='silver'?'border-slate-500/25':'border-orange-600/25':'border-rim';
+    const colBg=b?z==='gold'?'bg-yellow-400/5':z==='silver'?'bg-slate-500/5':'bg-orange-600/5':'bg-panel';
+    const card=document.createElement('div');
+    card.className=`border ${colBorder} ${colBg} rounded-xl p-3 text-center cursor-pointer hover:border-yellow-400/30 transition-colors`;
+    if(b)card.onclick=()=>openModal(b.id);
+    card.innerHTML=`<div class="fd font-bold text-xs text-yellow-400 mb-1">T${t}</div>${b?`<div class="text-[10px] text-gray-300 truncate font-medium">${b.co.split(' ').slice(0,2).join(' ')}</div><div class="text-[9px] text-muted mt-0.5">${b.pax} pax</div><span class="badge b-${b.pay} mt-1.5" style="font-size:9px;padding:1px 5px">${b.pay}</span>`:`<div class="text-[10px] text-muted">Available</div><div class="text-[9px] text-muted mt-0.5">${z==='gold'?10:z==='silver'?6:2} seats</div>`}`;
+    g.appendChild(card);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHECK-IN (admin)
+// ═══════════════════════════════════════════════════════
+function doCI(){const c=document.getElementById('ci-inp').value.trim().toUpperCase();processCI(c);document.getElementById('ci-inp').value='';}
+function dCI(c){document.getElementById('ci-inp').value=c;doCI();}
+function processCI(code){
+  const res=document.getElementById('ci-result');
+  const b=BOOKINGS.find(x=>x.tid.toUpperCase()===code);
+  res.classList.remove('hidden');
+  if(!b){
+    res.className='hidden surface rounded-2xl p-5 text-center ap border border-red-500/25';
+    res.innerHTML=`<div class="text-4xl mb-2">❌</div><div class="fd text-lg font-bold">Not Found</div><div class="text-xs text-muted mt-1">${code}</div>`;
+    res.classList.remove('hidden'); toast('Invalid ticket','warn'); return;
+  }
+  if(b.ci){
+    res.className='hidden surface rounded-2xl p-5 text-center ap border border-amber-500/25';
+    res.innerHTML=`<div class="text-4xl mb-2">⚠️</div><div class="fd text-lg font-bold">${b.co}</div><div class="text-xs text-amber-400 mt-1 font-semibold">Already checked in</div>`;
+    res.classList.remove('hidden'); toast('Already checked in','warn'); return;
+  }
+  b.ci=true;
+  res.className='hidden surface rounded-2xl p-5 text-center ap border border-emerald-500/25';
+  res.innerHTML=`<div class="text-4xl mb-2">✅</div><div class="fd text-lg font-bold text-gray-100">${b.co}</div><div class="text-sm text-gray-400 mt-1">${b.cp} · ${b.pax} pax · T${b.tbl}</div><div class="flex justify-center mt-2"><span class="badge ${PKG[b.pkg].bc}">${PKG[b.pkg].label}</span></div>`;
+  res.classList.remove('hidden');
+  const now=new Date(); ciLog.unshift({...b,time:now.toTimeString().slice(0,5)});
+  renderCILog(); document.getElementById('ci-cnt').textContent=ciLog.length;
+  toast('✅ '+b.co+' checked in!');
+}
+function renderCILog(){
+  const el=document.getElementById('ci-log');
+  el.innerHTML=ciLog.length?ciLog.map(c=>`<div class="px-5 py-3 flex items-center justify-between gap-2"><div><div class="text-sm font-medium text-gray-200">${c.co}</div><div class="text-xs text-muted">${c.tid} · T${c.tbl}</div></div><div class="text-right flex-shrink-0"><span class="badge ${PKG[c.pkg].bc}" style="font-size:10px">${PKG[c.pkg].label}</span><div class="text-[10px] text-muted mt-0.5">${c.time}</div></div></div>`).join(''):'<div class="px-5 py-8 text-center text-xs text-muted">No check-ins yet</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+//  REPORTS
+// ═══════════════════════════════════════════════════════
+function renderReports(){
+  const rows=['gold','silver','bronze'].map(k=>{
+    const all=BOOKINGS.filter(b=>b.pkg===k);
+    const paid=all.filter(b=>b.pay==='paid');
+    const p=PKG[k];
+    return `<tr class="tr border-t border-rim"><td class="px-5 py-3.5"><span class="badge ${p.bc}">${p.label}</span></td><td class="px-5 py-3.5 text-sm text-gray-300">${all.length}</td><td class="px-5 py-3.5 text-sm text-gray-300">${all.reduce((a,b)=>a+b.pax,0)}</td><td class="px-5 py-3.5 text-sm font-semibold text-yellow-400">RM ${fmt(all.length*p.price)}</td><td class="px-5 py-3.5 text-sm text-emerald-400 font-semibold">${paid.length}</td><td class="px-5 py-3.5 text-sm text-amber-400 font-semibold">${all.length-paid.length}</td></tr>`;
+  }).join('');
+  const tot=`<tr class="border-t-2 border-yellow-400/15 bg-yellow-400/3"><td class="px-5 py-3.5 font-bold text-gray-200">Total</td><td class="px-5 py-3.5 font-bold text-gray-200">${BOOKINGS.length}</td><td class="px-5 py-3.5 font-bold text-gray-200">${BOOKINGS.reduce((a,b)=>a+b.pax,0)}</td><td class="px-5 py-3.5 font-bold gt">RM ${fmt(BOOKINGS.reduce((a,b)=>a+PKG[b.pkg].price,0))}</td><td class="px-5 py-3.5 font-bold text-emerald-400">${BOOKINGS.filter(b=>b.pay==='paid').length}</td><td class="px-5 py-3.5 font-bold text-amber-400">${BOOKINGS.filter(b=>b.pay!=='paid').length}</td></tr>`;
+  document.getElementById('rep-summary').innerHTML=`<table class="w-full"><thead><tr class="bg-panel">${['Package','Count','Seats','Revenue','Paid','Pending'].map(h=>`<th class="px-5 py-3 text-left text-xs text-muted font-medium uppercase tracking-wider">${h}</th>`).join('')}</tr></thead><tbody>${rows+tot}</tbody></table>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  BOOKING DETAIL MODAL
+// ═══════════════════════════════════════════════════════
+function openModal(id){
+  const b=BOOKINGS.find(x=>x.id===id); if(!b)return;
+  const p=PKG[b.pkg];
+  document.getElementById('modal-bk-body').innerHTML=`
+    <div class="flex items-start gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-yellow-400/8 border border-yellow-400/20 fd font-black text-yellow-400 flex items-center justify-center text-sm flex-shrink-0">T${b.tbl}</div>
+      <div class="flex-1 min-w-0">
+        <div class="fd text-xl font-bold truncate">${b.co}</div>
+        <div class="text-xs text-muted mt-0.5">${b.tid} · Registered ${b.reg}</div>
+        <div class="flex flex-wrap gap-1.5 mt-2"><span class="badge ${p.bc}">${p.label}</span><span class="badge b-${b.pay}">${b.pay.charAt(0).toUpperCase()+b.pay.slice(1)}</span>${b.ci?'<span class="badge b-in">✓ Checked In</span>':''}</div>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2.5 text-xs">
+      ${[['Contact',b.cp],['Designation',b.des],['Email',b.em],['Phone',b.ph],['Package',p.label],['Table','Table '+b.tbl+' ('+p.zone+')'],['Seats',b.pax+' pax'],['Amount','RM '+fmt(p.price)]].map(([k,v])=>`<div class="bg-panel rounded-xl p-3 border border-rim"><div class="text-muted mb-0.5">${k}</div><div class="font-medium text-gray-200">${v}</div></div>`).join('')}
+    </div>
+    <div>
+      <div class="text-xs text-muted uppercase tracking-widest mb-2 font-medium">Guest List (${b.guests.length})</div>
+      <div class="grid grid-cols-2 gap-1.5">${b.guests.map((g,i)=>`<div class="flex items-center gap-1.5 text-xs text-gray-300 bg-panel rounded-lg px-3 py-2 border border-rim"><span class="text-muted w-4 text-right">${i+1}</span>${g}</div>`).join('')}</div>
+    </div>
+    ${b.pay!=='paid'?`<div class="flex gap-2 pt-2 border-t border-rim"><button onclick="approvePay(${b.id});closeModal()" class="btn-ok flex-1">✓ Approve Payment</button><button onclick="rejectPay(${b.id});closeModal()" class="btn-warn flex-1">✕ Reject</button></div>`:`<div class="pt-2 border-t border-rim text-center text-xs text-emerald-400 bg-emerald-500/6 border border-emerald-500/15 rounded-xl py-3">✓ Payment Verified & Confirmed</div>`}`;
+  document.getElementById('modal-bk').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('modal-bk').classList.add('hidden');}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORTS
+// ═══════════════════════════════════════════════════════
+function exportAll(){dlCSV([['Ticket','Company','Contact','Designation','Email','Phone','Package','Table','Pax','Payment','Registered','Checked In'],...BOOKINGS.map(b=>[b.tid,b.co,b.cp,b.des,b.em,b.ph,PKG[b.pkg].label,'Table '+b.tbl,b.pax,b.pay,b.reg,b.ci?'Yes':'No'])],'TMG_Sponsors_2026.csv');toast('Exported!');}
+function exportPayments(){dlCSV([['Ticket','Company','Package','Amount','Status','Date'],...BOOKINGS.map(b=>[b.tid,b.co,PKG[b.pkg].label,PKG[b.pkg].price,b.pay,b.reg])],'TMG_Revenue_2026.csv');toast('Revenue report exported!');}
+function exportSeating(){dlCSV([['Table','Zone','Company','Contact','Package','Pax'],...BOOKINGS.map(b=>['T'+b.tbl,PKG[b.pkg].zone,b.co,b.cp,PKG[b.pkg].label,b.pax])],'TMG_Seating_2026.csv');toast('Seating plan exported!');}
+function dlCSV(rows,fn){const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'));a.download=fn;a.click();}
+
+// ═══════════════════════════════════════════════════════
+//  GLOBAL SEARCH
+// ═══════════════════════════════════════════════════════
+function aSearch(q){if(!q.trim())return;asec('bookings');document.getElementById('bf-search').value=q;renderBookings();}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.className='fixed bottom-6 right-6 z-[300] flex items-center gap-3 px-5 py-3 rounded-2xl border text-sm font-medium shadow-2xl max-w-xs';
+  if(type==='warn')t.className+=' bg-amber-950 border-amber-600/35 text-amber-200';
+  else if(type==='err')t.className+=' bg-red-950 border-red-600/35 text-red-200';
+  else t.className+=' bg-card border-yellow-400/25 text-gray-100';
+  t.textContent=msg;t.classList.remove('hidden');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.add('hidden'),3500);
+}
+
+// ── Init ─────────────────────────────────────────────
+function fmt(n){return Number(n).toLocaleString();}
+updateLandStats();
+</script>
+</body>
+</html>
