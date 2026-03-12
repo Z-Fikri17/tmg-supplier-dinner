@@ -5,7 +5,20 @@
 'use strict';
 
 /* ── Config ───────────────────────────────────────────── */
-const API = 'http://localhost:4000/api';
+const API_DEFAULT = 'http://localhost:4000';
+const API_BASES = (() => {
+  const raw = [];
+  const explicit = (window.API_BASE || document?.body?.dataset?.api || '').trim();
+  if (explicit) raw.push(explicit);
+  if (location.protocol !== 'file:') raw.push(location.origin);
+  raw.push(API_DEFAULT);
+  const norm = raw
+    .filter(Boolean)
+    .map(b => b.replace(/\/$/, ''))
+    .map(b => (b.endsWith('/api') ? b : b + '/api'));
+  return [...new Set(norm)];
+})();
+let API = API_BASES[0] || (API_DEFAULT + '/api');
 const BANK_DETAILS = {
   bank:    'Maybank Berhad',
   name:    'TMG Group Sdn Bhd',
@@ -51,14 +64,51 @@ const ZONES = {
    API HELPERS
    ═══════════════════════════════════════════════════════ */
 async function apiFetch(path, opts = {}) {
-  try {
-    const res = await fetch(API + path, opts);
-    if (!res.ok) throw new Error(await res.text());
-    return await res.json();
-  } catch (e) {
-    console.warn('API error:', e.message);
-    return null;
+  for (const base of API_BASES) {
+    try {
+      const res = await fetch(base + path, opts);
+      const ct = res.headers.get('content-type') || '';
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch {}
+
+      if (res.ok) {
+        API = base;
+        return data;
+      }
+
+      if (data && typeof data === 'object') return data;
+      if (res.status === 404 || res.status === 405 || ct.includes('text/html') || /<!doctype html/i.test(text)) continue;
+      return null;
+    } catch (e) {
+      continue;
+    }
   }
+  return null;
+}
+
+async function apiPostMultipart(path, buildForm, opts = {}) {
+  for (const base of API_BASES) {
+    try {
+      const res = await fetch(base + path, { ...opts, body: buildForm() });
+      const ct = res.headers.get('content-type') || '';
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch {}
+
+      if (res.ok) {
+        API = base;
+        return { ok: true, data };
+      }
+
+      if (data && typeof data === 'object' && data.error) return { ok: false, data, status: res.status };
+      if (res.status === 404 || res.status === 405 || ct.includes('text/html') || /<!doctype html/i.test(text)) continue;
+      return { ok: false, data: data || { error: text || res.statusText }, status: res.status };
+    } catch (e) {
+      continue;
+    }
+  }
+  return { ok: false, data: null, status: 0 };
 }
 
 async function loadBookings() {
@@ -256,6 +306,7 @@ async function submitReg() {
   const em = document.getElementById('f-em').value.trim();
   const ph = document.getElementById('f-ph').value.trim();
   if (!co || !cp || !em || !ph)  { toast('Please fill in all required fields', 'warn'); return; }
+  if (!selectedTable?.n)         { toast('Please select a table', 'warn'); return; }
   if (!slipFile)                  { toast('Please upload your payment slip', 'warn'); return; }
 
   const p = PKG[currentPkg];
@@ -265,34 +316,35 @@ async function submitReg() {
     return { guest_name: inputs[0].value || 'Guest', position: inputs[1].value, dietary: inputs[2].value };
   });
 
-  // Build FormData for multipart (slip + data)
-  const fd = new FormData();
-  fd.append('company_name',    co);
-  fd.append('contact_name',    cp);
-  fd.append('designation',     document.getElementById('f-des').value || '');
-  fd.append('email',           em);
-  fd.append('phone',           ph);
-  fd.append('package',         currentPkg);
-  fd.append('table_no',        selectedTable.n);
-  fd.append('guests',          JSON.stringify(guests));
-  fd.append('slip',            slipFile);
-  if (logoFile)  fd.append('logo',     logoFile);
-  if (slideFile) fd.append('ad_slide', slideFile);
-  if (videoFile) fd.append('ad_video', videoFile);
+  const buildFormData = () => {
+    const fd = new FormData();
+    fd.append('company_name',    co);
+    fd.append('contact_name',    cp);
+    fd.append('designation',     document.getElementById('f-des').value || '');
+    fd.append('email',           em);
+    fd.append('phone',           ph);
+    fd.append('package',         currentPkg);
+    fd.append('table_no',        selectedTable.n);
+    fd.append('guests',          JSON.stringify(guests));
+    fd.append('slip',            slipFile);
+    if (logoFile)  fd.append('logo',     logoFile);
+    if (slideFile) fd.append('ad_slide', slideFile);
+    if (videoFile) fd.append('ad_video', videoFile);
+    return fd;
+  };
 
   toast('Submitting registration…');
 
   let result = null;
   let apiOk = false;
-  try {
-    const res = await fetch(API + '/suppliers', { method: 'POST', body: fd });
-    result = await res.json().catch(() => null);
-    if (!res.ok) {
-      toast(result?.error || 'Registration failed', 'err');
-      return;
-    }
+  const resp = await apiPostMultipart('/suppliers', buildFormData, { method: 'POST' });
+  if (resp.ok) {
     apiOk = true;
-  } catch (e) {
+    result = resp.data;
+  } else if (resp.data?.error) {
+    toast(resp.data.error || 'Registration failed', 'err');
+    return;
+  } else {
     apiOk = false;
   }
 
@@ -608,7 +660,13 @@ async function approvePay(tid) {
   const b = BOOKINGS.find(x => (x.tid ?? x.ticket_id) === tid);
   if (!b) return;
   const res = await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' }) });
-  if (!res) { toast('Payment approval failed. Server unavailable.', 'warn'); return; }
+  if (res?.error) { toast(res.error, 'warn'); return; }
+  if (!res) {
+    b.pay = b.payment_status = 'paid';
+    toast('Payment approved locally (server offline).', 'warn');
+    renderPayments(); renderBookings(); initAdminDash();
+    return;
+  }
   b.pay = b.payment_status = 'paid';
   const em = res.email;
   if (em?.status === 'sent') {
@@ -627,7 +685,13 @@ async function rejectPay(tid) {
   const b = BOOKINGS.find(x => (x.tid ?? x.ticket_id) === tid);
   if (!b) return;
   const res = await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejected', verified_by: currentAdmin?.n ?? 'admin' }) });
-  if (!res) { toast('Payment rejection failed. Server unavailable.', 'warn'); return; }
+  if (res?.error) { toast(res.error, 'warn'); return; }
+  if (!res) {
+    b.pay = b.payment_status = 'rejected';
+    toast('Payment rejected locally (server offline).', 'warn');
+    renderPayments(); renderBookings(); initAdminDash();
+    return;
+  }
   b.pay = b.payment_status = 'rejected';
   toast('Payment rejected', 'warn');
   renderPayments(); renderBookings(); initAdminDash();
