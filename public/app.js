@@ -660,26 +660,20 @@ function renderPayments() {
 
 async function approvePay(tid) {
   const b = BOOKINGS.find(x => (x.tid ?? x.ticket_id) === tid);
-  if (!b) return;
   const res = await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' }) });
-  if (res?.error) { toast(res.error, 'warn'); return; }
-  if (!res) {
-    b.pay = b.payment_status = 'paid';
-    toast('Payment approved locally (server offline).', 'warn');
-    renderPayments(); renderBookings(); initAdminDash();
-    return;
-  }
-  b.pay = b.payment_status = 'paid';
+  if (res?.error) { toast('Error: ' + res.error, 'warn'); return; }
+  if (!res) { toast('Server offline — cannot approve', 'warn'); return; }
+  if (b) b.pay = b.payment_status = 'paid';
   const em = res.email;
+  const co = b ? (b.co ?? b.company_name) : tid;
   if (em?.status === 'sent') {
-    toast('OK Payment approved + email sent - ' + (b.co ?? b.company_name));
+    toast('Payment approved & email sent — ' + co);
   } else if (em?.status === 'failed') {
-    toast('Payment approved. Email failed: ' + (em.reason || 'Unknown error'), 'warn');
-  } else if (em?.status === 'skipped' && em?.reason) {
-    toast('Payment approved. Email skipped: ' + em.reason, 'warn');
+    toast('Payment approved. Email failed: ' + (em.reason || 'Unknown'), 'warn');
   } else {
-    toast('OK Payment approved - ' + (b.co ?? b.company_name));
+    toast('Payment approved — ' + co);
   }
+  await loadBookings();
   renderPayments(); renderBookings(); initAdminDash();
 }
 
