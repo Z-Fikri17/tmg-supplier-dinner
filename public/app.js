@@ -660,19 +660,58 @@ function renderPayments() {
 
 async function approvePay(tid) {
   const b = BOOKINGS.find(x => (x.tid ?? x.ticket_id) === tid);
+  // Step 1: Update payment status on server
   const res = await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' }) });
   if (res?.error) { toast('Error: ' + res.error, 'warn'); return; }
   if (!res) { toast('Server offline — cannot approve', 'warn'); return; }
   if (b) b.pay = b.payment_status = 'paid';
-  const em = res.email;
   const co = b ? (b.co ?? b.company_name) : tid;
-  if (em?.status === 'sent') {
-    toast('Payment approved & email sent — ' + co);
-  } else if (em?.status === 'failed') {
-    toast('Payment approved. Email failed: ' + (em.reason || 'Unknown'), 'warn');
-  } else {
-    toast('Payment approved — ' + co);
+  toast('Payment approved — sending email...');
+
+  // Step 2: Send email directly from browser via Brevo API
+  try {
+    const sup = await apiFetch('/suppliers/' + tid);
+    const toEmail = sup?.email || sup?.em || '';
+    const testTo = 'ziron551@gmail.com'; // SMTP_TEST_TO
+    const sendTo = testTo || toEmail;
+    if (sendTo) {
+      const emailRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': 'xsmtpsib-afac68814633316613aef238800a7b11e404531e7c654b25ce50a1106703c73e-edgzz9I',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { name: 'TMG Supplier Dinner 2026', email: 'zulfikri19007@gmail.com' },
+          to: [{ email: sendTo }],
+          subject: 'TMG Supplier Appreciation Dinner 2026 - Payment Approved',
+          htmlContent: '<div style="font-family:Arial,sans-serif;padding:20px;">'
+            + '<h2>TMG Supplier Appreciation Dinner 2026</h2>'
+            + '<p>Dear Supplier,</p>'
+            + '<p>Your payment has been approved. Thank you for your support!</p>'
+            + '<table style="border-collapse:collapse;margin:12px 0;">'
+            + '<tr><td style="padding:4px 10px 4px 0;"><b>Company:</b></td><td>' + (sup?.company_name || sup?.co || co) + '</td></tr>'
+            + '<tr><td style="padding:4px 10px 4px 0;"><b>Package:</b></td><td>' + (sup?.package || sup?.pkg || '') + '</td></tr>'
+            + '<tr><td style="padding:4px 10px 4px 0;"><b>Table:</b></td><td>' + (sup?.table_no || sup?.tbl || 'TBA') + '</td></tr>'
+            + '<tr><td style="padding:4px 10px 4px 0;"><b>Ticket:</b></td><td>' + (sup?.ticket_id || sup?.tid || tid) + '</td></tr>'
+            + '</table>'
+            + '<p>Please present your ticket QR code at the entrance on event night.</p>'
+            + '<p>- TMG Events Team</p></div>'
+        })
+      });
+      if (emailRes.ok) {
+        toast('✓ Payment approved & email sent — ' + co);
+      } else {
+        const err = await emailRes.json();
+        toast('✓ Payment approved. Email error: ' + (err.message || emailRes.status), 'warn');
+      }
+    } else {
+      toast('✓ Payment approved (no email on file) — ' + co);
+    }
+  } catch(e) {
+    toast('✓ Payment approved. Email failed: ' + e.message, 'warn');
   }
+
   await loadBookings();
   renderPayments(); renderBookings(); initAdminDash();
 }
