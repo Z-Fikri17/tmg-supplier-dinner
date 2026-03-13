@@ -235,7 +235,7 @@ async function sendApprovalEmail(supplier, opts = {}) {
     + '<p>- TMG Events Team</p></div>';
 
   const fromEmail = process.env.SMTP_FROM || 'a4cdcb001@smtp-brevo.com';
-  const fromName  = process.env.SMTP_FROM_NAME || 'TMG Supplier Dinner 2026';
+  const fromName  = process.env.SMTP_FROM_NAME || 'tmg-supplier-dinner';
 
   const payload = JSON.stringify({
     sender: { name: fromName, email: fromEmail },
@@ -417,9 +417,10 @@ app.patch('/api/suppliers/:id/payment', async (req, res) => {
     let email = { status: 'skipped', reason: 'Not approved' };
     if (status === 'paid') {
       try {
-        email = await sendApprovalEmail(suppliers[idx]);
+        const _t = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 20000));
+        email = await Promise.race([sendApprovalEmail(suppliers[idx]), _t]);
       } catch (e) {
-        email = { status: 'failed', reason: e.message || 'Email send failed' };
+        email = { status: 'failed', reason: e.message || 'Email failed' };
       }
     }
 
