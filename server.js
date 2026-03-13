@@ -645,8 +645,16 @@ app.get('/api/health', (req, res) => {
 
 /* ── Start ──────────────────────────────────────────────── */
 initCSVFiles();
-app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅  TMG Dinner API running on http://localhost:${PORT}`);
   console.log(`📁  Data directory: ${DATA_DIR}`);
   console.log(`📎  Slips directory: ${SLIP_DIR}`);
+});
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => process.exit(0));
+});
+process.on('SIGINT', () => {
+  server.close(() => process.exit(0));
 });
