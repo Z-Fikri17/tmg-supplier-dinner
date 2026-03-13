@@ -644,9 +644,11 @@ function renderPayments() {
       <td class="px-5 py-4">${slip ? `<a href="${API.replace('/api','')}${slip}" target="_blank" class="text-xs text-blue-400 underline">View Slip</a>` : '<span class="text-xs text-muted">—</span>'}</td>
       <td class="px-5 py-4"><span class="badge b-${pay}">${pay.charAt(0).toUpperCase() + pay.slice(1)}</span></td>
       <td class="px-5 py-4 text-xs text-muted">${reg}</td>
-      <td class="px-5 py-4">${pay !== 'paid'
-        ? `<div class="flex gap-1.5"><button onclick="approvePay('${tid}')" class="btn-ok text-xs py-1.5 px-3">✓ Approve</button><button onclick="rejectPay('${tid}')" class="btn-warn text-xs py-1.5 px-3">✕ Reject</button></div>`
-        : `<span class="text-xs text-emerald-400">Verified ✓</span>`}
+      <td class="px-5 py-4">
+        <div class="flex gap-1.5 flex-wrap">
+          <button onclick="approvePay('${tid}')" class="btn-ok text-xs py-1.5 px-3">${pay === 'paid' ? '✉ Resend Email' : '✓ Approve'}</button>
+          ${pay !== 'paid' ? `<button onclick="rejectPay('${tid}')" class="btn-warn text-xs py-1.5 px-3">✕ Reject</button>` : ''}
+        </div>
       </td>
     </tr>`;
   }).join('');
@@ -659,31 +661,25 @@ function renderPayments() {
 async function approvePay(tid) {
   const b = BOOKINGS.find(x => (x.tid ?? x.ticket_id) === tid);
   if (!b) return;
-  const res = await apiFetch('/suppliers/' + tid + '/payment', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' })
-  });
-  if (res?.error) { toast('Approval failed: ' + res.error, 'warn'); return; }
+  const res = await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' }) });
+  if (res?.error) { toast(res.error, 'warn'); return; }
   if (!res) {
     b.pay = b.payment_status = 'paid';
-    toast('Payment approved locally (server offline — CSV not saved)', 'warn');
+    toast('Payment approved locally (server offline).', 'warn');
     renderPayments(); renderBookings(); initAdminDash();
     return;
   }
   b.pay = b.payment_status = 'paid';
   const em = res.email;
-  const co = b.co ?? b.company_name;
   if (em?.status === 'sent') {
-    toast('Payment approved & invitation email sent — ' + co);
+    toast('OK Payment approved + email sent - ' + (b.co ?? b.company_name));
   } else if (em?.status === 'failed') {
     toast('Payment approved. Email failed: ' + (em.reason || 'Unknown error'), 'warn');
-  } else if (em?.status === 'skipped') {
-    toast('Payment approved. Email skipped: ' + (em.reason || 'SMTP not configured'), 'warn');
+  } else if (em?.status === 'skipped' && em?.reason) {
+    toast('Payment approved. Email skipped: ' + em.reason, 'warn');
   } else {
-    toast('Payment approved — ' + co);
+    toast('OK Payment approved - ' + (b.co ?? b.company_name));
   }
-  await loadBookings();
   renderPayments(); renderBookings(); initAdminDash();
 }
 
@@ -958,9 +954,10 @@ function openModal(tid) {
         const gn = typeof g === 'string' ? g : (g.guest_name ?? 'Guest');
         return `<div class="flex items-center gap-1.5 text-xs text-gray-300 bg-panel rounded-lg px-3 py-2 border border-rim"><span class="text-muted w-4 text-right">${i+1}</span>${gn}</div>`;
       }).join('')}</div></div>` : ''}
-    ${pay !== 'paid'
-      ? `<div class="flex gap-2 pt-2 border-t border-rim"><button onclick="approvePay('${btid}');closeModal()" class="btn-ok flex-1">✓ Approve Payment</button><button onclick="rejectPay('${btid}');closeModal()" class="btn-warn flex-1">✕ Reject</button></div>`
-      : `<div class="pt-2 border-t border-rim text-center text-xs text-emerald-400 bg-emerald-500/6 border border-emerald-500/15 rounded-xl py-3">✓ Payment Verified & Confirmed</div>`}`;
+    <div class="flex gap-2 pt-2 border-t border-rim">
+      <button onclick="approvePay('${btid}');closeModal()" class="btn-ok flex-1">${pay === 'paid' ? '✉ Resend Invitation Email' : '✓ Approve Payment'}</button>
+      ${pay !== 'paid' ? `<button onclick="rejectPay('${btid}');closeModal()" class="btn-warn flex-1">✕ Reject</button>` : ''}
+    </div>`;
   document.getElementById('modal-bk').classList.remove('hidden');
 }
 function closeModal() { document.getElementById('modal-bk').classList.add('hidden'); }
