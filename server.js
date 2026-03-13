@@ -2,6 +2,7 @@
 // Run: npm install && node server.js
 
 'use strict';
+require('dotenv').config();
 
 const express = require('express');
 const cors    = require('cors');
@@ -13,6 +14,7 @@ const QRCode  = require('qrcode');
 
 const app  = express();
 const PORT = process.env.PORT || 4000;
+let LAST_EMAIL_ERROR = null;
 
 /* ── Paths ─────────────────────────────────────────────── */
 const DATA_DIR   = path.join(__dirname, 'data');
@@ -197,66 +199,154 @@ function buildFromAddress() {
   return fromEmail ? `${fromName} <${fromEmail}>` : '';
 }
 
-async function sendApprovalEmail(supplier) {
-  if (!supplier?.email) return { status: 'skipped', reason: 'Missing supplier email' };
+/* ── Build HTML seat map for email ─────────────────────── */
+function buildSeatMapHtml(highlightTable) {
+  // Layout: 54 tables in rows of 9, zones: VIP (1-8), Front (9-24), General (25-54)
+  const allSuppliers = parseCSV(SUPP_CSV, SUPP_COLS).map(mapSupplier);
+
+  const zoneColor = t => {
+    if (t <= 8)  return '#b8960c'; // VIP - gold
+    if (t <= 24) return '#6b7280'; // Front - silver
+    return '#92400e';              // General - bronze
+  };
+
+  const COLS = 9;
+  let rows = '';
+  for (let row = 0; row < Math.ceil(54 / COLS); row++) {
+    let cells = '';
+    for (let col = 0; col < COLS; col++) {
+      const t = row * COLS + col + 1;
+      if (t > 54) { cells += '<td style="width:48px;height:42px;"></td>'; continue; }
+      const isHighlight = t === Number(highlightTable);
+      const sup = allSuppliers.find(s => Number(s.table_no) === t);
+      const zc  = zoneColor(t);
+      const bg  = isHighlight ? '#22c55e' : (sup ? zc + '33' : '#1e1e2e');
+      const border = isHighlight ? '2px solid #22c55e' : `1px solid ${zc}55`;
+      const textColor = isHighlight ? '#fff' : (sup ? '#e5e7eb' : '#4b5563');
+      const label = isHighlight ? `<b>T${t}</b><br><span style="font-size:8px">YOU</span>` : `T${t}`;
+      cells += `<td style="width:48px;height:42px;text-align:center;vertical-align:middle;background:${bg};border:${border};border-radius:6px;font-size:10px;color:${textColor};padding:2px;">${label}</td>`;
+    }
+    rows += `<tr style="height:44px;">${cells}</tr>`;
+  }
+
+  // Legend
+  const legend = `
+    <tr><td colspan="9" style="padding-top:10px;text-align:center;font-size:10px;color:#9ca3af;">
+      <span style="display:inline-block;width:12px;height:12px;background:#22c55e;border-radius:3px;vertical-align:middle;margin-right:4px;"></span>Your Table &nbsp;
+      <span style="display:inline-block;width:12px;height:12px;background:#b8960c33;border:1px solid #b8960c55;border-radius:3px;vertical-align:middle;margin-right:4px;"></span>VIP &nbsp;
+      <span style="display:inline-block;width:12px;height:12px;background:#6b728033;border:1px solid #6b728055;border-radius:3px;vertical-align:middle;margin-right:4px;"></span>Front &nbsp;
+      <span style="display:inline-block;width:12px;height:12px;background:#1e1e2e;border:1px solid #4b556355;border-radius:3px;vertical-align:middle;margin-right:4px;"></span>Available
+    </td></tr>`;
+
+  return `
+    <div style="margin:18px 0;">
+      <p style="font-size:13px;font-weight:bold;color:#374151;margin-bottom:8px;">📍 Seating Map — Your table is highlighted in green</p>
+      <div style="background:#0f0f1a;border-radius:10px;padding:14px;display:inline-block;">
+        <table style="border-collapse:separate;border-spacing:3px;">
+          <thead><tr><td colspan="9" style="text-align:center;color:#9ca3af;font-size:11px;padding-bottom:6px;font-weight:bold;letter-spacing:1px;">── STAGE ──</td></tr></thead>
+          <tbody>${rows}${legend}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+async function sendApprovalEmail(supplier, opts = {}) {
+  // Ensure we use the mapped supplier fields (supports both raw CSV rows and mapped objects)
+  const rawEmail    = supplier.email    || supplier.em  || '';
+  const rawCompany  = supplier.company_name || supplier.co  || 'Supplier';
+  const rawContact  = supplier.contact_name || supplier.cp  || '';
+  const rawPackage  = supplier.package  || supplier.pkg || '';
+  const rawSeats    = Number(supplier.total_seats ?? supplier.pax) || PKG_SEATS[rawPackage] || 0;
+  const rawTableNo  = Number(supplier.table_no   ?? supplier.tbl) || 0;
+  const rawTicketId = supplier.ticket_id || supplier.tid || '';
+  const rawNotes    = supplier.notes    || '';
+
+  const overrideTo = !opts.ignoreOverride && process.env.SMTP_TEST_TO;
+  const toAddr = overrideTo || rawEmail;
+  if (!toAddr) return { status: 'skipped', reason: 'Missing supplier email' };
   const smtp = getSmtpConfig();
   if (!smtp) return { status: 'skipped', reason: 'SMTP not configured' };
 
   const transport = nodemailer.createTransport(smtp);
-  const pkgLabel  = PKG_LABEL[supplier.package] || supplier.package || 'Sponsor';
-  const seats     = Number(supplier.total_seats) || PKG_SEATS[supplier.package] || '';
-  const tableNo   = Number(supplier.table_no) || '';
-  const ticketId  = supplier.ticket_id || '';
-  const company   = supplier.company_name || 'Supplier';
-  const tableTag  = tableNo ? `T${tableNo}` : 'TBA';
+  const pkgLabel  = PKG_LABEL[rawPackage] || rawPackage || 'Sponsor';
+  const tableTag  = rawTableNo ? `T${rawTableNo}` : 'TBA';
 
-  const qrPayload = `${ticketId}|${company}|${tableTag}`;
+  const qrPayload = `${rawTicketId}|${rawCompany}|${tableTag}`;
   const qrBuffer  = await QRCode.toBuffer(qrPayload, { type: 'png', width: 240, errorCorrectionLevel: 'H' });
 
-  const subject = 'TMG Supplier Appreciation Dinner 2026 - Ticket & QR Check-In';
+  // Build seat map HTML (only if table is assigned)
+  const seatMapHtml = rawTableNo ? buildSeatMapHtml(rawTableNo) : '<p style="color:#9ca3af;font-size:13px;">Your table assignment will be confirmed closer to the event.</p>';
+
+  const subject = opts.subject || 'TMG Supplier Appreciation Dinner 2026 — Your Invitation & Seat Assignment';
+
   const text = [
-    'Dear Supplier,',
+    `Dear ${rawContact || 'Valued Supplier'},`,
     '',
-    'Thank you for supporting TMG Supplier Appreciation Dinner 2026.',
-    `Company: ${company}`,
-    `Package: ${pkgLabel}`,
-    `Seats: ${seats} pax`,
-    `Table: ${tableNo || 'TBA'}`,
-    `Ticket: ${ticketId}`,
+    'Your payment has been approved. You are officially confirmed for the TMG Supplier Appreciation Dinner 2026!',
     '',
-    'Your QR code is attached for event check-in.',
-    'Please present it at the entrance on event night.',
-  ].join('\n');
+    `Company : ${rawCompany}`,
+    `Package : ${pkgLabel}`,
+    `Seats   : ${rawSeats} pax`,
+    `Table   : ${rawTableNo || 'TBA'}`,
+    `Ticket  : ${rawTicketId}`,
+    overrideTo ? `[Test mode — original recipient: ${rawEmail}]` : '',
+    '',
+    'Your QR code is attached. Please present it at the entrance on event night.',
+    '',
+    '- TMG Events Team',
+  ].filter(Boolean).join('\n');
 
   const html = `
-    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111;">
-      <p>Dear Supplier,</p>
-      <p>Thank you for supporting <strong>TMG Supplier Appreciation Dinner 2026</strong>.</p>
-      <table style="border-collapse:collapse;margin:12px 0;">
-        <tr><td style="padding:4px 10px 4px 0;">Company:</td><td style="padding:4px 0;"><strong>${company}</strong></td></tr>
-        <tr><td style="padding:4px 10px 4px 0;">Package:</td><td style="padding:4px 0;">${pkgLabel}</td></tr>
-        <tr><td style="padding:4px 10px 4px 0;">Seats:</td><td style="padding:4px 0;">${seats} pax</td></tr>
-        <tr><td style="padding:4px 10px 4px 0;">Table:</td><td style="padding:4px 0;">${tableNo || 'TBA'}</td></tr>
-        <tr><td style="padding:4px 10px 4px 0;">Ticket:</td><td style="padding:4px 0;">${ticketId}</td></tr>
-      </table>
-      <p>Your QR code is attached for event check-in.</p>
-      <div style="margin:14px 0;">
-        <img src="cid:tmgqr" alt="TMG QR Code" width="200" height="200" style="border:1px solid #ddd;padding:6px;border-radius:8px;">
+    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111;max-width:620px;">
+      <div style="background:#0f0f1a;padding:20px 28px;border-radius:10px 10px 0 0;text-align:center;">
+        <h2 style="color:#f0b429;margin:0;font-size:20px;">TMG Supplier Appreciation Dinner 2026</h2>
+        <p style="color:#9ca3af;margin:6px 0 0;font-size:13px;">Payment Approved — You're Confirmed!</p>
       </div>
-      <p>Please present this QR at the entrance on event night.</p>
-      <p>- TMG Events Team</p>
+      <div style="background:#ffffff;padding:24px 28px;border:1px solid #e5e7eb;border-top:none;">
+        <p style="margin-top:0;">Dear <strong>${rawContact || 'Valued Supplier'}</strong>,</p>
+        <p>Your payment has been <strong style="color:#16a34a;">approved</strong>. We look forward to seeing you at the dinner!</p>
+
+        <table style="border-collapse:collapse;margin:16px 0;width:100%;max-width:380px;background:#f9fafb;border-radius:8px;">
+          <tr><td style="padding:8px 14px;color:#6b7280;font-size:13px;">Company</td>  <td style="padding:8px 14px;font-weight:bold;">${rawCompany}</td></tr>
+          <tr style="background:#f3f4f6;"><td style="padding:8px 14px;color:#6b7280;font-size:13px;">Package</td>  <td style="padding:8px 14px;">${pkgLabel}</td></tr>
+          <tr><td style="padding:8px 14px;color:#6b7280;font-size:13px;">Seats</td>    <td style="padding:8px 14px;">${rawSeats} pax</td></tr>
+          <tr style="background:#f3f4f6;"><td style="padding:8px 14px;color:#6b7280;font-size:13px;">Table</td>    <td style="padding:8px 14px;font-weight:bold;color:#0f766e;">${rawTableNo || 'TBA'}</td></tr>
+          <tr><td style="padding:8px 14px;color:#6b7280;font-size:13px;">Ticket ID</td><td style="padding:8px 14px;font-family:monospace;">${rawTicketId}</td></tr>
+          ${overrideTo ? `<tr style="background:#fef9c3;"><td style="padding:8px 14px;color:#854d0e;font-size:12px;" colspan="2">⚠ Test mode — original recipient: ${rawEmail}</td></tr>` : ''}
+        </table>
+
+        ${seatMapHtml}
+
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0;">
+        <p style="font-size:13px;">Please present the QR code below at the entrance for check-in:</p>
+        <div style="margin:14px 0;text-align:center;">
+          <img src="cid:tmgqr" alt="QR Check-In Code" width="180" height="180" style="border:1px solid #ddd;padding:8px;border-radius:8px;">
+          <p style="font-size:11px;color:#9ca3af;margin-top:6px;">Ticket: ${rawTicketId} | Table: ${tableTag}</p>
+        </div>
+
+        <p style="font-size:13px;color:#374151;">We look forward to your presence at the dinner. If you have any questions, please contact the TMG Events Team.</p>
+        <p style="color:#9ca3af;font-size:12px;margin-bottom:0;">— TMG Events Team</p>
+      </div>
+      <div style="background:#f9fafb;padding:10px 28px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;text-align:center;">
+        <p style="font-size:11px;color:#9ca3af;margin:0;">This is an automated confirmation from TMG Supplier Appreciation Dinner 2026</p>
+      </div>
     </div>`;
 
-  const info = await transport.sendMail({
-    from: buildFromAddress(),
-    to: supplier.email,
-    subject,
-    text,
-    html,
-    attachments: [{ filename: `TMG_QR_${ticketId}.png`, content: qrBuffer, cid: 'tmgqr' }],
-  });
-
-  return { status: 'sent', messageId: info.messageId || '' };
+  try {
+    const info = await transport.sendMail({
+      from: buildFromAddress(),
+      to: toAddr,
+      subject,
+      text,
+      html,
+      attachments: [{ filename: `TMG_QR_${rawTicketId}.png`, content: qrBuffer, cid: 'tmgqr' }],
+    });
+    LAST_EMAIL_ERROR = null;
+    return { status: 'sent', messageId: info.messageId || '' };
+  } catch (e) {
+    LAST_EMAIL_ERROR = { message: e.message || 'Email send failed', time: new Date().toISOString() };
+    throw e;
+  }
 }
 
 /* â”€â”€ Build seating plan (table -> company + guests) â”€â”€ */
@@ -421,6 +511,37 @@ app.post('/api/suppliers/:id/slip', uploadSlip.single('slip'), (req, res) => {
     suppliers[idx].payment_status   = 'review';
     writeCSV(SUPP_CSV, suppliers, SUPP_COLS);
     res.json({ slip_url: url, message: 'Slip uploaded — pending review' });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* GET /api/email/status — SMTP config + last error */
+app.get('/api/email/status', (req, res) => {
+  try {
+    const smtp = getSmtpConfig();
+    res.json({
+      configured: !!smtp,
+      from: buildFromAddress(),
+      test_to: process.env.SMTP_TEST_TO || '',
+      last_error: LAST_EMAIL_ERROR,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/* POST /api/email/test — send a test email */
+app.post('/api/email/test', async (req, res) => {
+  try {
+    const to = req.body?.to;
+    if (!to) return res.status(400).json({ error: 'Missing test email address' });
+    const mock = {
+      email: to,
+      company_name: 'TMG Email Test',
+      package: 'gold',
+      total_seats: 10,
+      table_no: 99,
+      ticket_id: 'TMG-TEST-EMAIL',
+    };
+    const result = await sendApprovalEmail(mock, { ignoreOverride: true, subject: 'TMG Email Test - QR Check-In' });
+    res.json({ message: 'Test email sent', result });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

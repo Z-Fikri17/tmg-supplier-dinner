@@ -659,25 +659,31 @@ function renderPayments() {
 async function approvePay(tid) {
   const b = BOOKINGS.find(x => (x.tid ?? x.ticket_id) === tid);
   if (!b) return;
-  const res = await apiFetch('/suppliers/' + tid + '/payment', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' }) });
-  if (res?.error) { toast(res.error, 'warn'); return; }
+  const res = await apiFetch('/suppliers/' + tid + '/payment', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: 'paid', verified_by: currentAdmin?.n ?? 'admin' })
+  });
+  if (res?.error) { toast('Approval failed: ' + res.error, 'warn'); return; }
   if (!res) {
     b.pay = b.payment_status = 'paid';
-    toast('Payment approved locally (server offline).', 'warn');
+    toast('Payment approved locally (server offline — CSV not saved)', 'warn');
     renderPayments(); renderBookings(); initAdminDash();
     return;
   }
   b.pay = b.payment_status = 'paid';
   const em = res.email;
+  const co = b.co ?? b.company_name;
   if (em?.status === 'sent') {
-    toast('OK Payment approved + email sent - ' + (b.co ?? b.company_name));
+    toast('Payment approved & invitation email sent — ' + co);
   } else if (em?.status === 'failed') {
-    toast('Payment approved. Email failed to send.', 'warn');
-  } else if (em?.status === 'skipped' && em?.reason) {
-    toast('Payment approved. Email skipped: ' + em.reason, 'warn');
+    toast('Payment approved. Email failed: ' + (em.reason || 'Unknown error'), 'warn');
+  } else if (em?.status === 'skipped') {
+    toast('Payment approved. Email skipped: ' + (em.reason || 'SMTP not configured'), 'warn');
   } else {
-    toast('OK Payment approved - ' + (b.co ?? b.company_name));
+    toast('Payment approved — ' + co);
   }
+  await loadBookings();
   renderPayments(); renderBookings(); initAdminDash();
 }
 

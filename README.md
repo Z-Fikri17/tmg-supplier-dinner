@@ -128,9 +128,15 @@ SMTP_USER=your_user
 SMTP_PASS=your_pass
 SMTP_FROM=events@yourdomain.com
 SMTP_FROM_NAME=TMG Supplier Dinner 2026
+SMTP_TEST_TO=
 ```
 
 If SMTP is not configured, approvals still succeed and email sending is skipped.
+
+Notes:
+- The server reads a local `.env` file if present (via `dotenv`).
+- If `SMTP_TEST_TO` is set, all approval emails are routed to that address (useful for testing).
+- Email health endpoints: `GET /api/email/status` and `POST /api/email/test` with JSON `{ "to": "name@example.com" }`.
 
 ---
 
