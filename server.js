@@ -9,7 +9,7 @@ const cors    = require('cors');
 const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
-const nodemailer = require('nodemailer');
+const https = require('https');
 const QRCode  = require('qrcode');
 
 const app  = express();
@@ -192,7 +192,7 @@ function getSmtpConfig() {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   if (!user || !pass) return null;
-  return { host, port, secure, auth: { user, pass }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 };
+  return { host, port, secure, auth: { user, pass } };
 }
 
 function buildFromAddress() {
@@ -202,75 +202,84 @@ function buildFromAddress() {
 }
 
 async function sendApprovalEmail(supplier, opts = {}) {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return { status: 'skipped', reason: 'BREVO_API_KEY not set' };
+
   const overrideTo = !opts.ignoreOverride && process.env.SMTP_TEST_TO;
   const toAddr = overrideTo || supplier?.email;
   if (!toAddr) return { status: 'skipped', reason: 'Missing supplier email' };
-  const smtp = getSmtpConfig();
-  if (!smtp) return { status: 'skipped', reason: 'SMTP not configured' };
 
-  const transport = nodemailer.createTransport(smtp);
   const pkgLabel  = PKG_LABEL[supplier.package] || supplier.package || 'Sponsor';
   const seats     = Number(supplier.total_seats) || PKG_SEATS[supplier.package] || '';
   const tableNo   = Number(supplier.table_no) || '';
   const ticketId  = supplier.ticket_id || '';
   const company   = supplier.company_name || 'Supplier';
-  const tableTag  = tableNo ? `T${tableNo}` : 'TBA';
+  const tableTag  = tableNo ? 'T' + tableNo : 'TBA';
 
-  const qrPayload = `${ticketId}|${company}|${tableTag}`;
+  const qrPayload = ticketId + '|' + company + '|' + tableTag;
   const qrBuffer  = await QRCode.toBuffer(qrPayload, { type: 'png', width: 240, errorCorrectionLevel: 'H' });
+  const qrBase64  = qrBuffer.toString('base64');
 
-  const subject = opts.subject || 'TMG Supplier Appreciation Dinner 2026 - Ticket & QR Check-In';
-  const text = [
-    'Dear Supplier,',
-    '',
-    'Thank you for supporting TMG Supplier Appreciation Dinner 2026.',
-    `Company: ${company}`,
-    `Package: ${pkgLabel}`,
-    `Seats: ${seats} pax`,
-    `Table: ${tableNo || 'TBA'}`,
-    `Ticket: ${ticketId}`,
-    overrideTo ? `Original recipient: ${supplier?.email || '-'}` : '',
-    '',
-    'Your QR code is attached for event check-in.',
-    'Please present it at the entrance on event night.',
-  ].filter(Boolean).join('\n');
+  const htmlContent = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#111;">
+    <p>Dear Supplier,</p>
+    <p>Thank you for supporting <strong>TMG Supplier Appreciation Dinner 2026</strong>.</p>
+    <table style="border-collapse:collapse;margin:12px 0;">
+      <tr><td style="padding:4px 10px 4px 0;">Company:</td><td><strong>${company}</strong></td></tr>
+      <tr><td style="padding:4px 10px 4px 0;">Package:</td><td>${pkgLabel}</td></tr>
+      <tr><td style="padding:4px 10px 4px 0;">Seats:</td><td>${seats} pax</td></tr>
+      <tr><td style="padding:4px 10px 4px 0;">Table:</td><td>${tableNo || 'TBA'}</td></tr>
+      <tr><td style="padding:4px 10px 4px 0;">Ticket:</td><td>${ticketId}</td></tr>
+    </table>
+    <p>Your QR code is attached. Please present it at the entrance on event night.</p>
+    <img src="data:image/png;base64,${qrBase64}" width="200" height="200" style="border:1px solid #ddd;padding:6px;border-radius:8px;">
+    <p>- TMG Events Team</p>
+  </div>`;
 
-  const html = `
-    <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111;">
-      <p>Dear Supplier,</p>
-      <p>Thank you for supporting <strong>TMG Supplier Appreciation Dinner 2026</strong>.</p>
-      <table style="border-collapse:collapse;margin:12px 0;">
-        <tr><td style="padding:4px 10px 4px 0;">Company:</td><td style="padding:4px 0;"><strong>${company}</strong></td></tr>
-        <tr><td style="padding:4px 10px 4px 0;">Package:</td><td style="padding:4px 0;">${pkgLabel}</td></tr>
-        <tr><td style="padding:4px 10px 4px 0;">Seats:</td><td style="padding:4px 0;">${seats} pax</td></tr>
-        <tr><td style="padding:4px 10px 4px 0;">Table:</td><td style="padding:4px 0;">${tableNo || 'TBA'}</td></tr>
-        <tr><td style="padding:4px 10px 4px 0;">Ticket:</td><td style="padding:4px 0;">${ticketId}</td></tr>
-        ${overrideTo ? `<tr><td style="padding:4px 10px 4px 0;">Original recipient:</td><td style="padding:4px 0;">${supplier?.email || '-'}</td></tr>` : ''}
-      </table>
-      <p>Your QR code is attached for event check-in.</p>
-      <div style="margin:14px 0;">
-        <img src="cid:tmgqr" alt="TMG QR Code" width="200" height="200" style="border:1px solid #ddd;padding:6px;border-radius:8px;">
-      </div>
-      <p>Please present this QR at the entrance on event night.</p>
-      <p>- TMG Events Team</p>
-    </div>`;
+  const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@tmg.com';
+  const fromName  = process.env.SMTP_FROM_NAME || 'TMG Supplier Dinner 2026';
 
-  try {
-    const info = await transport.sendMail({
-      from: buildFromAddress(),
-      to: toAddr,
-      subject,
-      text,
-      html,
-      attachments: [{ filename: `TMG_QR_${ticketId}.png`, content: qrBuffer, cid: 'tmgqr' }],
+  const payload = JSON.stringify({
+    sender: { name: fromName, email: fromEmail },
+    to: [{ email: toAddr }],
+    subject: opts.subject || 'TMG Supplier Appreciation Dinner 2026 - Ticket & QR Check-In',
+    htmlContent,
+    attachment: [{ name: 'TMG_QR_' + ticketId + '.png', content: qrBase64 }]
+  });
+
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'api.brevo.com',
+      path: '/v3/smtp/email',
+      method: 'POST',
+      headers: {
+        'api-key': apiKey,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          LAST_EMAIL_ERROR = null;
+          resolve({ status: 'sent', messageId: data });
+        } else {
+          const err = 'Brevo API error ' + res.statusCode + ': ' + data;
+          LAST_EMAIL_ERROR = { message: err, time: new Date().toISOString() };
+          reject(new Error(err));
+        }
+      });
     });
-    LAST_EMAIL_ERROR = null;
-    return { status: 'sent', messageId: info.messageId || '' };
-  } catch (e) {
-    LAST_EMAIL_ERROR = { message: e.message || 'Email send failed', time: new Date().toISOString() };
-    throw e;
-  }
+    req.on('error', (e) => {
+      LAST_EMAIL_ERROR = { message: e.message, time: new Date().toISOString() };
+      reject(e);
+    });
+    req.setTimeout(15000, () => { req.destroy(); reject(new Error('API timeout')); });
+    req.write(payload);
+    req.end();
+  });
 }
+
 
 /* â”€â”€ Build seating plan (table -> company + guests) â”€â”€ */
 function buildSeatingPlan() {
@@ -412,8 +421,7 @@ app.patch('/api/suppliers/:id/payment', async (req, res) => {
     let email = { status: 'skipped', reason: 'Not approved' };
     if (status === 'paid') {
       try {
-        const _timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Connection timeout')), 20000));
-        email = await Promise.race([sendApprovalEmail(suppliers[idx]), _timeout]);
+        email = await sendApprovalEmail(suppliers[idx]);
       } catch (e) {
         email = { status: 'failed', reason: e.message || 'Email send failed' };
       }
