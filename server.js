@@ -410,7 +410,7 @@ app.patch('/api/suppliers/:id/payment', async (req, res) => {
     writeCSV(SUPP_CSV, suppliers, SUPP_COLS);
 
     let email = { status: 'skipped', reason: 'Not approved' };
-    if (status === 'paid' && prevStatus !== 'paid') {
+    if (status === 'paid') {
       try {
         email = await sendApprovalEmail(suppliers[idx]);
       } catch (e) {
