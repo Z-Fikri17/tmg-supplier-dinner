@@ -192,7 +192,7 @@ function getSmtpConfig() {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   if (!user || !pass) return null;
-  return { host, port, secure, auth: { user, pass } };
+  return { host, port, secure, auth: { user, pass }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 };
 }
 
 function buildFromAddress() {
@@ -412,7 +412,8 @@ app.patch('/api/suppliers/:id/payment', async (req, res) => {
     let email = { status: 'skipped', reason: 'Not approved' };
     if (status === 'paid') {
       try {
-        email = await sendApprovalEmail(suppliers[idx]);
+        const _timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Connection timeout')), 20000));
+        email = await Promise.race([sendApprovalEmail(suppliers[idx]), _timeout]);
       } catch (e) {
         email = { status: 'failed', reason: e.message || 'Email send failed' };
       }
