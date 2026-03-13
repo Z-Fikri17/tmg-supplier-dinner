@@ -209,33 +209,32 @@ async function sendApprovalEmail(supplier, opts = {}) {
   const toAddr = overrideTo || supplier?.email;
   if (!toAddr) return { status: 'skipped', reason: 'Missing supplier email' };
 
-  const pkgLabel  = PKG_LABEL[supplier.package] || supplier.package || 'Sponsor';
-  const seats     = Number(supplier.total_seats) || PKG_SEATS[supplier.package] || '';
-  const tableNo   = Number(supplier.table_no) || '';
-  const ticketId  = supplier.ticket_id || '';
-  const company   = supplier.company_name || 'Supplier';
-  const tableTag  = tableNo ? 'T' + tableNo : 'TBA';
+  const pkgLabel = PKG_LABEL[supplier.package] || supplier.package || 'Sponsor';
+  const seats    = Number(supplier.total_seats) || PKG_SEATS[supplier.package] || '';
+  const tableNo  = Number(supplier.table_no) || '';
+  const ticketId = supplier.ticket_id || '';
+  const company  = supplier.company_name || 'Supplier';
+  const tableTag = tableNo ? 'T' + tableNo : 'TBA';
 
   const qrPayload = ticketId + '|' + company + '|' + tableTag;
   const qrBuffer  = await QRCode.toBuffer(qrPayload, { type: 'png', width: 240, errorCorrectionLevel: 'H' });
   const qrBase64  = qrBuffer.toString('base64');
 
-  const htmlContent = `<div style="font-family:Arial,sans-serif;font-size:14px;color:#111;">
-    <p>Dear Supplier,</p>
-    <p>Thank you for supporting <strong>TMG Supplier Appreciation Dinner 2026</strong>.</p>
-    <table style="border-collapse:collapse;margin:12px 0;">
-      <tr><td style="padding:4px 10px 4px 0;">Company:</td><td><strong>${company}</strong></td></tr>
-      <tr><td style="padding:4px 10px 4px 0;">Package:</td><td>${pkgLabel}</td></tr>
-      <tr><td style="padding:4px 10px 4px 0;">Seats:</td><td>${seats} pax</td></tr>
-      <tr><td style="padding:4px 10px 4px 0;">Table:</td><td>${tableNo || 'TBA'}</td></tr>
-      <tr><td style="padding:4px 10px 4px 0;">Ticket:</td><td>${ticketId}</td></tr>
-    </table>
-    <p>Your QR code is attached. Please present it at the entrance on event night.</p>
-    <img src="data:image/png;base64,${qrBase64}" width="200" height="200" style="border:1px solid #ddd;padding:6px;border-radius:8px;">
-    <p>- TMG Events Team</p>
-  </div>`;
+  const htmlContent = '<div style="font-family:Arial,sans-serif;font-size:14px;color:#111;">'
+    + '<p>Dear Supplier,</p>'
+    + '<p>Thank you for supporting <strong>TMG Supplier Appreciation Dinner 2026</strong>.</p>'
+    + '<table style="border-collapse:collapse;margin:12px 0;">'
+    + '<tr><td style="padding:4px 10px 4px 0;">Company:</td><td><strong>' + company + '</strong></td></tr>'
+    + '<tr><td style="padding:4px 10px 4px 0;">Package:</td><td>' + pkgLabel + '</td></tr>'
+    + '<tr><td style="padding:4px 10px 4px 0;">Seats:</td><td>' + seats + ' pax</td></tr>'
+    + '<tr><td style="padding:4px 10px 4px 0;">Table:</td><td>' + (tableNo || 'TBA') + '</td></tr>'
+    + '<tr><td style="padding:4px 10px 4px 0;">Ticket:</td><td>' + ticketId + '</td></tr>'
+    + '</table>'
+    + '<p>Your QR code is attached. Please present it at the entrance on event night.</p>'
+    + '<img src="data:image/png;base64,' + qrBase64 + '" width="200" height="200" style="border:1px solid #ddd;padding:6px;border-radius:8px;">'
+    + '<p>- TMG Events Team</p></div>';
 
-  const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@tmg.com';
+  const fromEmail = process.env.SMTP_FROM || 'a4cdcb001@smtp-brevo.com';
   const fromName  = process.env.SMTP_FROM_NAME || 'TMG Supplier Dinner 2026';
 
   const payload = JSON.stringify({
@@ -264,16 +263,13 @@ async function sendApprovalEmail(supplier, opts = {}) {
           LAST_EMAIL_ERROR = null;
           resolve({ status: 'sent', messageId: data });
         } else {
-          const err = 'Brevo API error ' + res.statusCode + ': ' + data;
+          const err = 'Brevo error ' + res.statusCode + ': ' + data;
           LAST_EMAIL_ERROR = { message: err, time: new Date().toISOString() };
           reject(new Error(err));
         }
       });
     });
-    req.on('error', (e) => {
-      LAST_EMAIL_ERROR = { message: e.message, time: new Date().toISOString() };
-      reject(e);
-    });
+    req.on('error', (e) => { LAST_EMAIL_ERROR = { message: e.message, time: new Date().toISOString() }; reject(e); });
     req.setTimeout(15000, () => { req.destroy(); reject(new Error('API timeout')); });
     req.write(payload);
     req.end();
